@@ -3,7 +3,7 @@ import Link from "next/link";
 export const metadata = {
   title: "ReverbTab | EsoteryOne",
   description:
-    "ReverbTab é a estação tecnológica de irradiação energética da EsoteryOne, criada para tratamentos amorosos e materiais com visual premium, presença profissional e experiência de alto valor.",
+    "ReverbTab é a tecnologia de irradiação energética da EsoteryOne, criada para irradiar ondas de formas materializadoras que irão reverberar nos campos amorosos e materiais com visual premium, funcional, presença profissional e experiência de alto valor.",
 };
 
 const beneficios = [
@@ -92,9 +92,9 @@ export default function ReverbTabPage() {
 
             <p className="mt-6 max-w-2xl text-base leading-7 text-cyan-300/80 md:text-lg">
               Pensado para atuar nos campos amoroso e material, o sistema
-              organiza a etapa prática da emissão energética e posiciona o
-              profissional como alguém que trabalha com método, clareza e
-              tecnologia.
+              emite a frequência necessária para limpeza e materialização
+              de todos os campos. Tornando o  terapeuta um profissional que 
+              trabalha com método, clareza e tecnologia.
             </p>
 
             <div className="mt-10 flex flex-col gap-4 sm:flex-row">
