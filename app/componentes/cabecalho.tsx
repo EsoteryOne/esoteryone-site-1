@@ -11,7 +11,6 @@ export default function Cabecalho() {
     { nome: "Soluções", rota: "/solucoes" },
     { nome: "Visão", rota: "/visao" },
     { nome: "Tecnologias", rota: "/tecnologias" },
-    { nome: "Minhas assinaturas", rota: "/minhas-assinaturas" },
     { nome: "Contato", rota: "/contato" },
   ];
 
@@ -48,15 +47,15 @@ export default function Cabecalho() {
 
         <div className="hidden sm:flex items-center gap-3">
           <Link
-            href="/contato"
-            className="hidden sm:inline-flex rounded-full border border-white/12 px-4 py-2 text-sm text-white/75 transition hover:border-cyan-300/30 hover:text-white"
+            href="/entrar"
+            className="rounded-full border border-white/12 px-4 py-2 text-sm text-white/75 transition hover:border-cyan-300/30 hover:text-white"
           >
             Login
           </Link>
 
           <Link
-            href="/tecnologias"
-            className="inline-flex rounded-full bg-cyan-300 px-5 py-2 text-sm font-medium text-[#031018] transition hover:brightness-110"
+            href="/cadastro"
+            className="rounded-full bg-cyan-300 px-5 py-2 text-sm font-medium text-[#031018] transition hover:brightness-110"
           >
             Começar
           </Link>
@@ -90,7 +89,7 @@ export default function Cabecalho() {
 
           <div className="mt-4 flex flex-col gap-3">
             <Link
-              href="/contato"
+              href="/entrar"
               onClick={() => setMenuAberto(false)}
               className="inline-flex justify-center rounded-full border border-white/12 px-4 py-3 text-sm text-white/75 transition hover:border-cyan-300/30 hover:text-white"
             >
@@ -98,7 +97,7 @@ export default function Cabecalho() {
             </Link>
 
             <Link
-              href="/tecnologias"
+              href="/cadastro"
               onClick={() => setMenuAberto(false)}
               className="inline-flex justify-center rounded-full bg-cyan-300 px-5 py-3 text-sm font-medium text-[#031018] transition hover:brightness-110"
             >
