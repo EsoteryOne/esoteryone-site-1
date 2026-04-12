@@ -100,10 +100,10 @@ export default function Cadastro() {
       })
 
       if (error) {
-        alert('Não foi possível concluir o cadastro.')
+        alert(`Não foi possível concluir o cadastro: ${error.message}`)
         console.error(error)
         return
-      }
+    }
 
       const usuarioId = data.user?.id
 
@@ -121,10 +121,10 @@ export default function Cadastro() {
       })
 
       if (erroTabelaUsuarios) {
-        alert('O cadastro foi criado, mas houve erro ao salvar os dados do perfil.')
+        alert(`O cadastro foi criado, mas houve erro ao salvar os dados do perfil: ${erroTabelaUsuarios.message}`)
         console.error(erroTabelaUsuarios)
         return
-      }
+        }
 
       alert('Cadastro realizado com sucesso. Agora você já pode entrar na sua conta.')
       router.push('/entrar')
