@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import LogoEsoteryOne from "./LogoEsoteryOne";
 
 export default function Cabecalho() {
   const [menuAberto, setMenuAberto] = useState(false);
@@ -17,21 +18,7 @@ export default function Cabecalho() {
   return (
     <header className="sticky top-0 z-50 border-b border-white/10 bg-[#050816]/80 backdrop-blur-xl">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-        <div className="flex items-center gap-3">
-          <div className="relative h-10 w-10 overflow-hidden rounded-2xl border border-cyan-400/30 bg-cyan-400/10">
-            <div className="absolute inset-[6px] rounded-xl border border-cyan-300/40" />
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(34,211,238,0.22),transparent_65%)]" />
-          </div>
-
-          <div>
-            <p className="text-[10px] uppercase tracking-[0.38em] text-cyan-300">
-              EsoteryOne
-            </p>
-            <p className="text-xs text-white/45">
-              tecnologia para terapeutas
-            </p>
-          </div>
-        </div>
+        <LogoEsoteryOne tamanho="sm" clicavel />
 
         <nav className="hidden xl:flex items-center gap-7">
           {itensMenu.map((item) => (

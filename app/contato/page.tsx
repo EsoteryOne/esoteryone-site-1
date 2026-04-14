@@ -39,7 +39,7 @@ export default function PaginaContato() {
                   WhatsApp
                 </p>
                 <p className="mt-2 text-xl font-medium text-cyan-50">
-                  (51) 99999-9999
+                  (51) 99826-7095
                 </p>
                 <p className="mt-2 text-sm leading-7 text-cyan-50/65">
                   Atendimento para dúvidas, orçamento e direcionamento inicial.
