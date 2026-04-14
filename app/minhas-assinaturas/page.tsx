@@ -5,49 +5,119 @@ import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 
 type UsuarioLogado = {
+  id: string
   email: string
+}
+
+type Compra = {
+  id: string
+  usuario_id: string
+  produto_id: string
+  status: string | null
+  data_compra: string | null
+  expira_em: string | null
+}
+
+type Produto = {
+  id: string
+  nome: string
+  descricao: string | null
+  ativo: boolean | null
+  criado_em: string | null
 }
 
 export default function PaginaMinhasAssinaturas() {
   const router = useRouter()
+
   const [carregando, setCarregando] = useState(true)
   const [usuario, setUsuario] = useState<UsuarioLogado | null>(null)
+  const [produtosLiberados, setProdutosLiberados] = useState<Produto[]>([])
+  const [erro, setErro] = useState<string | null>(null)
 
   useEffect(() => {
-    async function verificarSessao() {
-      const { data, error } = await supabase.auth.getSession()
+    async function carregarAreaDoCliente() {
+      setCarregando(true)
+      setErro(null)
 
-      if (error) {
-        console.error(error)
+      const { data: sessaoData, error: sessaoError } =
+        await supabase.auth.getSession()
+
+      if (sessaoError) {
+        console.error('Erro ao obter sessão:', sessaoError)
         router.replace('/entrar')
         return
       }
 
-      const emailUsuario = data.session?.user?.email
+      const usuarioAuth = sessaoData.session?.user
 
-      if (!emailUsuario) {
+      if (!usuarioAuth?.id || !usuarioAuth.email) {
         router.replace('/entrar')
         return
       }
 
-      setUsuario({ email: emailUsuario })
+      const usuarioAtual: UsuarioLogado = {
+        id: usuarioAuth.id,
+        email: usuarioAuth.email,
+      }
+
+      setUsuario(usuarioAtual)
+
+      const { data: comprasData, error: comprasError } = await supabase
+        .from('compras')
+        .select('id, usuario_id, produto_id, status, data_compra, expira_em')
+        .eq('usuario_id', usuarioAtual.id)
+        .eq('status', 'pago')
+
+      if (comprasError) {
+        console.error('Erro ao buscar compras:', comprasError)
+        setErro('Não foi possível carregar seus produtos liberados.')
+        setCarregando(false)
+        return
+      }
+
+      const compras = (comprasData ?? []) as Compra[]
+
+      if (compras.length === 0) {
+        setProdutosLiberados([])
+        setCarregando(false)
+        return
+      }
+
+      const idsDosProdutos = [...new Set(compras.map((compra) => compra.produto_id))]
+
+      const { data: produtosData, error: produtosError } = await supabase
+        .from('produtos')
+        .select('id, nome, descricao, ativo, criado_em')
+        .in('id', idsDosProdutos)
+        .eq('ativo', true)
+
+      if (produtosError) {
+        console.error('Erro ao buscar produtos:', produtosError)
+        setErro('Não foi possível carregar os detalhes dos seus produtos.')
+        setCarregando(false)
+        return
+      }
+
+      setProdutosLiberados((produtosData ?? []) as Produto[])
       setCarregando(false)
     }
 
-    verificarSessao()
+    carregarAreaDoCliente()
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_evento, session) => {
-      const emailUsuario = session?.user?.email
+      const usuarioAuth = session?.user
 
-      if (!emailUsuario) {
+      if (!usuarioAuth?.id || !usuarioAuth.email) {
         router.replace('/entrar')
         return
       }
 
-      setUsuario({ email: emailUsuario })
-      setCarregando(false)
+      setUsuario({
+        id: usuarioAuth.id,
+        email: usuarioAuth.email,
+      })
     })
 
     return () => {
@@ -58,6 +128,20 @@ export default function PaginaMinhasAssinaturas() {
   async function sairDaConta() {
     await supabase.auth.signOut()
     router.replace('/entrar')
+  }
+
+  function obterTextoBotao(nomeProduto: string) {
+    const nome = nomeProduto.toLowerCase()
+
+    if (nome.includes('emotion')) {
+      return 'Acessar Emotion Tab'
+    }
+
+    if (nome.includes('prospera')) {
+      return 'Acessar Prospera Tab'
+    }
+
+    return 'Acessar produto'
   }
 
   if (carregando) {
@@ -85,7 +169,8 @@ export default function PaginaMinhasAssinaturas() {
               </h1>
 
               <p className="mt-4 text-base leading-7 text-cyan-50/75">
-                Conta conectada: <span className="text-cyan-200">{usuario?.email}</span>
+                Conta conectada:{' '}
+                <span className="text-cyan-200">{usuario?.email}</span>
               </p>
             </div>
 
@@ -99,49 +184,60 @@ export default function PaginaMinhasAssinaturas() {
           </div>
         </div>
 
-        <section className="grid gap-6 md:grid-cols-2">
-          <article className="rounded-[2rem] border border-cyan-300/20 bg-cyan-400/10 p-8 backdrop-blur-xl">
+        {erro ? (
+          <section className="rounded-[2rem] border border-red-400/20 bg-red-500/10 p-8 backdrop-blur-xl">
+            <p className="text-base leading-7 text-red-100">{erro}</p>
+          </section>
+        ) : null}
+
+        {produtosLiberados.length === 0 && !erro ? (
+          <section className="rounded-[2rem] border border-cyan-300/20 bg-cyan-400/10 p-8 backdrop-blur-xl">
             <p className="text-sm uppercase tracking-[0.35em] text-cyan-300/80">
-              Produto liberado
+              Nenhum acesso liberado
             </p>
 
             <h2 className="mt-4 text-3xl font-semibold text-cyan-50">
-              Emotion Tab
+              Você ainda não possui produtos ativos
             </h2>
 
-            <p className="mt-4 leading-7 text-cyan-50/75">
-              Aqui ficará o download do instalador, os arquivos oficiais e os materiais de apoio do sistema.
+            <p className="mt-4 max-w-3xl leading-7 text-cyan-50/75">
+              Assim que uma compra for aprovada e vinculada à sua conta, seus
+              acessos aparecerão automaticamente nesta área.
             </p>
+          </section>
+        ) : null}
 
-            <button
-              type="button"
-              className="mt-8 rounded-2xl bg-cyan-300 px-5 py-4 text-base font-semibold text-[#031018] transition hover:opacity-90"
-            >
-              Baixar instalador
-            </button>
-          </article>
+        {produtosLiberados.length > 0 ? (
+          <section className="grid gap-6 md:grid-cols-2">
+            {produtosLiberados.map((produto) => (
+              <article
+                key={produto.id}
+                className="rounded-[2rem] border border-cyan-300/20 bg-cyan-400/10 p-8 backdrop-blur-xl"
+              >
+                <p className="text-sm uppercase tracking-[0.35em] text-cyan-300/80">
+                  Produto liberado
+                </p>
 
-          <article className="rounded-[2rem] border border-cyan-300/20 bg-cyan-400/10 p-8 backdrop-blur-xl">
-            <p className="text-sm uppercase tracking-[0.35em] text-cyan-300/80">
-              Treinamento
-            </p>
+                <h2 className="mt-4 text-3xl font-semibold text-cyan-50">
+                  {produto.nome}
+                </h2>
 
-            <h2 className="mt-4 text-3xl font-semibold text-cyan-50">
-              Conteúdo de acesso
-            </h2>
+                <p className="mt-4 leading-7 text-cyan-50/75">
+                  {produto.descricao?.trim()
+                    ? produto.descricao
+                    : 'Seu produto já está liberado em sua área de membros.'}
+                </p>
 
-            <p className="mt-4 leading-7 text-cyan-50/75">
-              Aqui ficarão seus vídeos, orientações, passo a passo de instalação e instruções de ativação.
-            </p>
-
-            <button
-              type="button"
-              className="mt-8 rounded-2xl border border-cyan-300/25 px-5 py-4 text-base font-semibold text-cyan-50 transition hover:bg-cyan-300/10"
-            >
-              Ver treinamento
-            </button>
-          </article>
-        </section>
+                <button
+                  type="button"
+                  className="mt-8 rounded-2xl bg-cyan-300 px-5 py-4 text-base font-semibold text-[#031018] transition hover:opacity-90"
+                >
+                  {obterTextoBotao(produto.nome)}
+                </button>
+              </article>
+            ))}
+          </section>
+        ) : null}
       </div>
     </main>
   )
