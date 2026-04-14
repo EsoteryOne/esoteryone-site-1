@@ -21,6 +21,7 @@ type Compra = {
 type Produto = {
   id: string
   nome: string
+  slug: string
   descricao: string | null
   ativo: boolean | null
   criado_em: string | null
@@ -87,7 +88,7 @@ export default function PaginaMinhasAssinaturas() {
 
       const { data: produtosData, error: produtosError } = await supabase
         .from('produtos')
-        .select('id, nome, descricao, ativo, criado_em')
+        .select('id, nome, slug, descricao, ativo, criado_em')
         .in('id', idsDosProdutos)
         .eq('ativo', true)
 
@@ -134,14 +135,18 @@ export default function PaginaMinhasAssinaturas() {
     const nome = nomeProduto.toLowerCase()
 
     if (nome.includes('emotion')) {
-      return 'Acessar Emotion Tab'
+      return 'Abrir página do Emotion Tab'
     }
 
     if (nome.includes('prospera')) {
-      return 'Acessar Prospera Tab'
+      return 'Abrir página do ProsperaTab'
     }
 
-    return 'Acessar produto'
+    return 'Abrir página do produto'
+  }
+
+  function abrirProduto(slug: string) {
+    router.push(`/minhas-assinaturas/${slug}`)
   }
 
   if (carregando) {
@@ -230,6 +235,7 @@ export default function PaginaMinhasAssinaturas() {
 
                 <button
                   type="button"
+                  onClick={() => abrirProduto(produto.slug)}
                   className="mt-8 rounded-2xl bg-cyan-300 px-5 py-4 text-base font-semibold text-[#031018] transition hover:opacity-90"
                 >
                   {obterTextoBotao(produto.nome)}
