@@ -88,6 +88,7 @@ export async function POST(req: Request) {
           quantity: 1,
         },
       ],
+      allow_promotion_codes: true,
       success_url: `${process.env.NEXT_PUBLIC_SITE_URL}/sucesso/${slug_produto}`,
       cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL}/cancelado`,
       metadata: {
