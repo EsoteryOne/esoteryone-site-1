@@ -35,51 +35,43 @@ export default function LandingPageEmotionTab() {
   const [botaoOffset, setBotaoOffset] = useState({ x: 0, y: 0 });
 
   async function iniciarVideoComSom() {
-    const video = videoRef.current;
-    if (!video) return;
+  const video = videoRef.current;
+  if (!video) return;
 
-    try {
-      if (fadeAudioIntervalRef.current) {
-        clearInterval(fadeAudioIntervalRef.current);
-        fadeAudioIntervalRef.current = null;
-      }
+  try {
+    video.pause();
+    video.currentTime = 0;
+    ultimoTempoValidoRef.current = 0;
 
-      video.controls = false;
-      video.currentTime = 0;
-      ultimoTempoValidoRef.current = 0;
-      video.muted = false;
-      video.volume = 0.05;
+    video.muted = false;
+    video.volume = 1;
 
-      await video.play();
+    setErroVideo(false);
+    setOverlaySaindo(true);
 
-      setErroVideo(false);
-      setOverlaySaindo(true);
+    if (video.readyState < 3) {
+      await new Promise<void>((resolve) => {
+        const aoPoderReproduzir = () => {
+          video.removeEventListener("canplay", aoPoderReproduzir);
+          resolve();
+        };
 
-      fadeAudioIntervalRef.current = setInterval(() => {
-        const videoAtual = videoRef.current;
-        if (!videoAtual) return;
-
-        if (videoAtual.volume >= 0.95) {
-          videoAtual.volume = 1;
-
-          if (fadeAudioIntervalRef.current) {
-            clearInterval(fadeAudioIntervalRef.current);
-            fadeAudioIntervalRef.current = null;
-          }
-          return;
-        }
-
-        videoAtual.volume = Math.min(videoAtual.volume + 0.08, 1);
-      }, 120);
-
-      setTimeout(() => {
-        setVideoIniciado(true);
-      }, 280);
-    } catch {
-      setErroVideo(true);
-      setOverlaySaindo(false);
+        video.addEventListener("canplay", aoPoderReproduzir);
+      });
     }
+
+    await new Promise((resolve) => setTimeout(resolve, 80));
+
+    await video.play();
+
+    setVideoIniciado(true);
+  } catch {
+    setErroVideo(true);
+    setOverlaySaindo(false);
   }
+}
+
+
 
   async function iniciarCheckout() {
     setErroCheckout("");
@@ -327,56 +319,13 @@ export default function LandingPageEmotionTab() {
 
                     <div className="relative z-10 flex items-center justify-center px-6">
                       <button
-                        ref={botaoMagneticoRef}
                         type="button"
                         onClick={iniciarVideoComSom}
-                        onMouseEnter={() => setBotaoHover(true)}
-                        onMouseMove={aoMoverNoBotao}
-                        onMouseLeave={aoSairDoBotao}
-                        className="group relative flex items-center justify-center px-14 py-6 text-base font-semibold uppercase tracking-[0.22em] text-white transition-transform duration-200 ease-out sm:px-20 sm:py-7 sm:text-xl"
-                        style={{
-                          transform: `translate(${botaoOffset.x}px, ${botaoOffset.y}px) scale(${
-                            botaoHover ? 1.04 : 1
-                          })`,
-                        }}
+                        className="group relative flex h-20 w-20 items-center justify-center rounded-full border border-cyan-300/30 bg-cyan-400/15 backdrop-blur-sm transition-all duration-300 hover:scale-110 hover:bg-cyan-300/20"
+                        aria-label="Iniciar apresentação"
                       >
-                        <span className="absolute -inset-10 rounded-[3rem] bg-cyan-300/25 blur-[70px] opacity-90 transition-all duration-300 group-hover:bg-cyan-300/45 group-hover:blur-[95px]" />
-                        <span className="absolute -inset-5 rounded-[2.7rem] bg-blue-500/20 blur-[40px] opacity-80 transition-all duration-300 group-hover:opacity-100" />
-
-                        <span
-                          className="absolute inset-0 bg-gradient-to-r from-cyan-300 via-sky-400 to-blue-500 shadow-[0_0_30px_rgba(56,189,248,0.9),0_0_70px_rgba(37,99,235,0.55),inset_0_1px_0_rgba(255,255,255,0.45)]"
-                          style={{
-                            clipPath:
-                              "polygon(0% 18%, 8% 0%, 89% 0%, 100% 50%, 89% 100%, 8% 100%, 0% 82%, 4% 50%)",
-                          }}
-                        />
-
-                        <span
-                          className="absolute inset-[2px] bg-[linear-gradient(135deg,rgba(12,32,52,0.08),rgba(7,17,28,0.2)_20%,rgba(255,255,255,0.12)_55%,rgba(7,17,28,0.08)_100%)] backdrop-blur-sm"
-                          style={{
-                            clipPath:
-                              "polygon(0% 18%, 8% 0%, 89% 0%, 100% 50%, 89% 100%, 8% 100%, 0% 82%, 4% 50%)",
-                          }}
-                        />
-
-                        <span
-                          className="absolute inset-[2px] border border-white/30"
-                          style={{
-                            clipPath:
-                              "polygon(0% 18%, 8% 0%, 89% 0%, 100% 50%, 89% 100%, 8% 100%, 0% 82%, 4% 50%)",
-                          }}
-                        />
-
-                        <span className="absolute left-[-26%] top-0 h-full w-[26%] skew-x-[-26deg] bg-white/45 blur-xl transition-all duration-1000 group-hover:left-[118%]" />
-                        <span className="absolute inset-0 shadow-[inset_0_1px_0_rgba(255,255,255,0.55),0_0_35px_rgba(34,211,238,0.4),0_0_90px_rgba(34,211,238,0.22)]" />
-
-                        <span className="relative z-10 flex items-center gap-4">
-                          <span className="relative flex h-4 w-4">
-                            <span className="absolute inset-0 rounded-full bg-white shadow-[0_0_18px_rgba(255,255,255,1),0_0_30px_rgba(34,211,238,0.9)]" />
-                            <span className="absolute inset-[-8px] rounded-full bg-cyan-300/50 blur-md" />
-                          </span>
-                          <span>Iniciar apresentação</span>
-                        </span>
+                        <span className="absolute inset-0 rounded-full bg-cyan-300/25 blur-lg opacity-70 transition-all duration-300 group-hover:opacity-100 group-hover:blur-xl" />
+                        <span className="relative z-10 ml-1 block h-0 w-0 border-y-[12px] border-y-transparent border-l-[18px] border-l-white transition-transform duration-300 group-hover:scale-110" />
                       </button>
                     </div>
                   </div>
