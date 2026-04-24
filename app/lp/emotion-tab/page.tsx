@@ -34,33 +34,25 @@ export default function LandingPageEmotionTab() {
   const [botaoHover, setBotaoHover] = useState(false);
   const [botaoOffset, setBotaoOffset] = useState({ x: 0, y: 0 });
 
-  async function iniciarVideoComSom() {
+async function iniciarVideoComSom() {
   const video = videoRef.current;
   if (!video) return;
 
   try {
-    video.pause();
-    video.currentTime = 0;
-    ultimoTempoValidoRef.current = 0;
-
-    video.muted = false;
-    video.volume = 1;
+    if (fadeAudioIntervalRef.current) {
+      clearInterval(fadeAudioIntervalRef.current);
+      fadeAudioIntervalRef.current = null;
+    }
 
     setErroVideo(false);
     setOverlaySaindo(true);
 
-    if (video.readyState < 3) {
-      await new Promise<void>((resolve) => {
-        const aoPoderReproduzir = () => {
-          video.removeEventListener("canplay", aoPoderReproduzir);
-          resolve();
-        };
-
-        video.addEventListener("canplay", aoPoderReproduzir);
-      });
-    }
-
-    await new Promise((resolve) => setTimeout(resolve, 80));
+    video.pause();
+    video.controls = false;
+    video.muted = false;
+    video.volume = 1;
+    video.currentTime = 0;
+    ultimoTempoValidoRef.current = 0;
 
     await video.play();
 
@@ -68,6 +60,7 @@ export default function LandingPageEmotionTab() {
   } catch {
     setErroVideo(true);
     setOverlaySaindo(false);
+    setVideoIniciado(false);
   }
 }
 
