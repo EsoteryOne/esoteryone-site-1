@@ -1,174 +1,231 @@
 import { NextResponse } from "next/server";
-import Stripe from "stripe";
 import { createClient } from "@supabase/supabase-js";
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2026-03-25.dahlia",
-});
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
+function pegarCodigoPedido(dados: any) {
+  return (
+    dados?.order?.code ??
+    dados?.code ??
+    dados?.order_code ??
+    dados?.charge?.order?.code ??
+    dados?.charges?.[0]?.order?.code ??
+    null
+  );
+}
+
+function pegarIdEvento(evento: any, dados: any) {
+  return evento?.id ?? dados?.id ?? dados?.code ?? null;
+}
+
+function pegarIdPedido(dados: any) {
+  return dados?.order?.id ?? dados?.id ?? null;
+}
+
+function pegarIdCobranca(dados: any) {
+  return dados?.charge?.id ?? dados?.charges?.[0]?.id ?? dados?.id ?? null;
+}
+
+function pegarMetodoPagamento(dados: any) {
+  return (
+    dados?.payment_method ??
+    dados?.charge?.payment_method ??
+    dados?.charges?.[0]?.payment_method ??
+    "desconhecido"
+  );
+}
+
+function pegarValorPagoCentavos(dados: any, lead: any) {
+  return Number(
+    dados?.amount ??
+      dados?.paid_amount ??
+      dados?.charge?.amount ??
+      dados?.charges?.[0]?.amount ??
+      lead?.valor_final_centavos ??
+      0
+  );
+}
 
 export async function POST(req: Request) {
-  const body = await req.text();
-  const signature = req.headers.get("stripe-signature");
-
-  if (!signature) {
-    return NextResponse.json(
-      { error: "Assinatura do webhook não enviada." },
-      { status: 400 }
-    );
-  }
-
-  let event: Stripe.Event;
-
   try {
-    event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
-  } catch (err: any) {
-    console.error("Erro ao validar assinatura do webhook:", err?.message);
-    return NextResponse.json(
-      { error: `Webhook inválido: ${err?.message}` },
-      { status: 400 }
-    );
-  }
+    const evento = await req.json();
 
-  try {
-    console.log("========== WEBHOOK RECEBIDO ==========");
-    console.log("event.id:", event.id);
-    console.log("event.type:", event.type);
+    console.log("========== WEBHOOK PAGAR.ME ==========");
+    console.log(JSON.stringify(evento, null, 2));
     console.log("======================================");
 
-    if (event.type === "checkout.session.completed") {
-      const session = event.data.object as Stripe.Checkout.Session;
+    const tipoEvento = evento?.type || evento?.event;
+    const dados = evento?.data;
 
-      const emailCompra = session.customer_email || session.customer_details?.email || null;
-      const slugProduto = session.metadata?.slug_produto || null;
-      const nomeCliente = session.metadata?.nome || null;
+    const eventosPagos = ["order.paid", "charge.paid", "payment.paid"];
 
-      if (!emailCompra || !slugProduto) {
-        console.error("Webhook sem emailCompra ou slugProduto.");
-        return NextResponse.json({ received: true });
-      }
+    if (!eventosPagos.includes(tipoEvento)) {
+      return NextResponse.json({
+        received: true,
+        ignored: true,
+        type: tipoEvento,
+      });
+    }
 
-      const checkoutSessionId = session.id;
+    const codigoPedido = pegarCodigoPedido(dados);
 
-        const { data: compraExistentePorEvento } = await supabase
-        .from("compras")
-        .select("id")
-        .eq("stripe_event_id", event.id)
-        .maybeSingle();
+    if (!codigoPedido) {
+      console.error("Webhook sem código do pedido:", dados);
+      return NextResponse.json(
+        { error: "Webhook sem código do pedido." },
+        { status: 400 }
+      );
+    }
 
-        if (compraExistentePorEvento) {
-        console.log("Compra já registrada para este evento.");
-        return NextResponse.json({ received: true });
-        }
+    const { data: lead, error: erroLeadBusca } = await supabase
+      .from("leads")
+      .select("*")
+      .eq("codigo_pedido_pagarme", codigoPedido)
+      .maybeSingle();
 
-        const { data: compraExistentePorSessao } = await supabase
-        .from("compras")
-        .select("id")
-        .eq("stripe_checkout_session_id", checkoutSessionId)
-        .maybeSingle();
+    if (erroLeadBusca || !lead) {
+      console.error("Lead não encontrado para o pedido:", codigoPedido);
+      return NextResponse.json(
+        { error: "Lead não encontrado para este pedido." },
+        { status: 400 }
+      );
+    }
 
-        if (compraExistentePorSessao) {
-        console.log("Compra já registrada para esta sessão.");
-        return NextResponse.json({ received: true });
-        }
+    const email = lead.email;
+    const nome = lead.nome;
+    const telefone = lead.telefone;
+    const produto_id = lead.produto_id;
 
-      const { data: produto, error: erroProduto } = await supabase
-        .from("produtos")
-        .select("id, slug")
-        .eq("slug", slugProduto)
+    const idEvento = pegarIdEvento(evento, dados);
+    const idPedido = pegarIdPedido(dados);
+    const idCobranca = pegarIdCobranca(dados);
+    const metodoPagamento = pegarMetodoPagamento(dados);
+    const valorPagoCentavos = pegarValorPagoCentavos(dados, lead);
+
+    const { data: usuarioExistente, error: erroBuscaUsuario } = await supabase
+      .from("usuarios")
+      .select("*")
+      .eq("email", email)
+      .maybeSingle();
+
+    if (erroBuscaUsuario) {
+      console.error("Erro ao buscar usuário:", erroBuscaUsuario);
+      return NextResponse.json(
+        { error: "Erro ao buscar usuário." },
+        { status: 500 }
+      );
+    }
+
+    let usuarioId = usuarioExistente?.id;
+
+    if (!usuarioId) {
+      const { data: novoUsuario, error: erroUsuario } = await supabase
+        .from("usuarios")
+        .insert([
+          {
+            nome,
+            email,
+            telefone,
+            acesso_liberado: true,
+          },
+        ])
+        .select("*")
         .single();
 
-      if (erroProduto || !produto) {
-        console.error("Produto não encontrado no webhook:", erroProduto);
-        return NextResponse.json({ received: true });
+      if (erroUsuario) {
+        console.error("Erro ao criar usuário:", erroUsuario);
+        return NextResponse.json(
+          { error: "Erro ao criar usuário." },
+          { status: 500 }
+        );
       }
 
-      let usuarioId: string | null = null;
-
-      const { data: usuarioExistente, error: erroUsuarioExistente } = await supabase
+      usuarioId = novoUsuario.id;
+    } else {
+      const { error: erroAtualizarUsuario } = await supabase
         .from("usuarios")
-        .select("id, email")
-        .eq("email", emailCompra)
-        .maybeSingle();
+        .update({
+          nome,
+          telefone,
+          acesso_liberado: true,
+        })
+        .eq("id", usuarioId);
 
-      if (erroUsuarioExistente) {
-        console.error("Erro ao buscar usuário existente:", erroUsuarioExistente);
-        return NextResponse.json({ received: true });
+      if (erroAtualizarUsuario) {
+        console.error("Erro ao atualizar usuário:", erroAtualizarUsuario);
+        return NextResponse.json(
+          { error: "Erro ao atualizar usuário." },
+          { status: 500 }
+        );
       }
+    }
 
-      if (usuarioExistente) {
-        usuarioId = usuarioExistente.id;
-      } else {
-        const { data: novoUsuario, error: erroNovoUsuario } = await supabase
-          .from("usuarios")
-          .insert([
-            {
-              nome: nomeCliente || emailCompra,
-              email: emailCompra,
-            },
-          ])
-          .select("id")
-          .single();
+    const { data: compraExistente, error: erroBuscaCompra } = await supabase
+      .from("compras")
+      .select("id")
+      .eq("codigo_pedido_pagarme", codigoPedido)
+      .maybeSingle();
 
-        if (erroNovoUsuario || !novoUsuario) {
-          console.error("Erro ao criar usuário no webhook:", erroNovoUsuario);
-          return NextResponse.json({ received: true });
-        }
+    if (erroBuscaCompra) {
+      console.error("Erro ao buscar compra:", erroBuscaCompra);
+      return NextResponse.json(
+        { error: "Erro ao buscar compra." },
+        { status: 500 }
+      );
+    }
 
-        usuarioId = novoUsuario.id;
-      }
-
-      const agora = new Date();
-      const expiraEm = new Date(agora);
-      expiraEm.setFullYear(expiraEm.getFullYear() + 1);
-
+    if (!compraExistente) {
       const { error: erroCompra } = await supabase.from("compras").insert([
         {
           usuario_id: usuarioId,
-          produto_id: produto.id,
+          produto_id,
           status: "pago",
-          data_compra: agora.toISOString(),
-          expira_em: expiraEm.toISOString(),
-          email_compra: emailCompra,
-          stripe_event_id: event.id,
-          stripe_checkout_session_id: checkoutSessionId,
+          email_compra: email,
+
+          id_pagarme_evento: idEvento ? String(idEvento) : null,
+          id_pagarme_checkout: codigoPedido,
+          codigo_pedido_pagarme: codigoPedido,
+          id_pagarme_pedido: idPedido ? String(idPedido) : null,
+          id_pagarme_cobranca: idCobranca ? String(idCobranca) : null,
+
+          valor_pago_centavos: valorPagoCentavos,
+          cupom_usado: lead.cupom_usado || null,
+          metodo_pagamento: metodoPagamento,
         },
       ]);
 
       if (erroCompra) {
         console.error("Erro ao registrar compra:", erroCompra);
-        return NextResponse.json({ received: true });
+        return NextResponse.json(
+          { error: "Erro ao registrar compra." },
+          { status: 500 }
+        );
       }
-
-      console.log("✅ Compra registrada com sucesso no checkout.session.completed");
     }
 
-    if (event.type === "invoice.paid") {
-      const invoice = event.data.object as Stripe.Invoice;
+    await supabase
+      .from("leads")
+      .update({ status: "pago" })
+      .eq("codigo_pedido_pagarme", codigoPedido);
 
-      const emailCompra = invoice.customer_email || null;
-
-      console.log("invoice.paid recebido");
-      console.log("invoice.id:", invoice.id);
-      console.log("emailCompra:", emailCompra);
-
-      // Neste momento, como seu fluxo real é de pagamento único e a validade
-      // anual é controlada internamente por você na liberação da chave,
-      // este bloco fica apenas registrado para compatibilidade futura.
-      // Ele não cria nova compra para não duplicar registro.
-    }
-
-    return NextResponse.json({ received: true });
+    return NextResponse.json({
+      received: true,
+      paid: true,
+      codigoPedido,
+      usuario_id: usuarioId,
+      produto_id,
+    });
   } catch (err: any) {
-    console.error("Erro interno no webhook:", err);
+    console.error("Erro webhook Pagar.me:", err);
+
     return NextResponse.json(
-      { error: "Erro interno no webhook." },
+      {
+        error: "Erro no webhook.",
+        detalhe: err?.message,
+      },
       { status: 500 }
     );
   }

@@ -7,6 +7,15 @@ export default function PaginaEmotionTab() {
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [telefone, setTelefone] = useState("");
+  const [cpf, setCpf] = useState("");
+  const [cep, setCep] = useState("");
+  const [estado, setEstado] = useState("");
+  const [cidade, setCidade] = useState("");
+  const [bairro, setBairro] = useState("");
+  const [endereco, setEndereco] = useState("");
+  const [numero, setNumero] = useState("");
+  const [complemento, setComplemento] = useState("");
+  const [cupom, setCupom] = useState("");
   const [carregandoCheckout, setCarregandoCheckout] = useState(false);
   const [erroCheckout, setErroCheckout] = useState("");
 
@@ -28,6 +37,41 @@ export default function PaginaEmotionTab() {
       return;
     }
 
+    if (!cpf.trim()) {
+      setErroCheckout("Campo CPF obrigatório.");
+      return;
+    }
+
+    if (!cep.trim()) {
+      setErroCheckout("Campo CEP obrigatório.");
+      return;
+    }
+
+    if (!estado.trim()) {
+      setErroCheckout("Campo estado obrigatório.");
+      return;
+    }
+
+    if (!cidade.trim()) {
+      setErroCheckout("Campo cidade obrigatório.");
+      return;
+    }
+
+    if (!bairro.trim()) {
+      setErroCheckout("Campo bairro obrigatório.");
+      return;
+    }
+
+    if (!endereco.trim()) {
+      setErroCheckout("Campo endereço obrigatório.");
+      return;
+    }
+
+    if (!numero.trim()) {
+      setErroCheckout("Campo número obrigatório.");
+      return;
+    }
+
     try {
       setCarregandoCheckout(true);
 
@@ -40,6 +84,15 @@ export default function PaginaEmotionTab() {
           nome,
           email,
           telefone,
+          cpf,
+          cep,
+          estado,
+          cidade,
+          bairro,
+          endereco,
+          numero,
+          complemento,
+          cupom,
           slug_produto: "emotion-tab",
         }),
       });
@@ -57,7 +110,7 @@ export default function PaginaEmotionTab() {
         return;
       }
 
-      setErroCheckout("A Stripe não retornou a URL do checkout.");
+      setErroCheckout("O Pagar.me não retornou a URL do checkout.");
       setCarregandoCheckout(false);
     } catch {
       setErroCheckout("Ocorreu um erro ao iniciar o checkout.");
@@ -182,8 +235,8 @@ export default function PaginaEmotionTab() {
       </div>
 
       {mostrarFormularioCompra && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4">
-          <div className="w-full max-w-xl rounded-[2rem] border border-cyan-300/15 bg-[#07131d] p-6 shadow-[0_0_60px_rgba(34,211,238,0.12)] sm:p-8">
+        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/70 px-4 py-8">
+          <div className="w-full max-w-2xl rounded-[2rem] border border-cyan-300/15 bg-[#07131d] p-6 shadow-[0_0_60px_rgba(34,211,238,0.12)] sm:p-8">
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="text-sm font-semibold uppercase tracking-[0.25em] text-cyan-300">
@@ -237,7 +290,7 @@ export default function PaginaEmotionTab() {
 
               <div>
                 <label className="mb-2 block text-sm font-medium text-white/85">
-                  Telefone
+                  Telefone com DDD
                 </label>
                 <input
                   type="tel"
@@ -245,6 +298,129 @@ export default function PaginaEmotionTab() {
                   onChange={(e) => setTelefone(e.target.value)}
                   className="w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-white outline-none transition focus:border-cyan-300/40"
                   placeholder="51 9 9999-9999"
+                />
+              </div>
+
+              <div>
+                <label className="mb-2 block text-sm font-medium text-white/85">
+                  CPF
+                </label>
+                <input
+                  type="text"
+                  value={cpf}
+                  onChange={(e) => setCpf(e.target.value)}
+                  className="w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-white outline-none transition focus:border-cyan-300/40"
+                  placeholder="000.000.000-00"
+                />
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-white/85">
+                    CEP
+                  </label>
+                  <input
+                    type="text"
+                    value={cep}
+                    onChange={(e) => setCep(e.target.value)}
+                    className="w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-white outline-none transition focus:border-cyan-300/40"
+                    placeholder="00000-000"
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-white/85">
+                    Estado
+                  </label>
+                  <input
+                    type="text"
+                    value={estado}
+                    onChange={(e) => setEstado(e.target.value)}
+                    className="w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-white outline-none transition focus:border-cyan-300/40"
+                    placeholder="RS"
+                  />
+                </div>
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-white/85">
+                    Cidade
+                  </label>
+                  <input
+                    type="text"
+                    value={cidade}
+                    onChange={(e) => setCidade(e.target.value)}
+                    className="w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-white outline-none transition focus:border-cyan-300/40"
+                    placeholder="Porto Alegre"
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-white/85">
+                    Bairro
+                  </label>
+                  <input
+                    type="text"
+                    value={bairro}
+                    onChange={(e) => setBairro(e.target.value)}
+                    className="w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-white outline-none transition focus:border-cyan-300/40"
+                    placeholder="Centro"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="mb-2 block text-sm font-medium text-white/85">
+                  Endereço
+                </label>
+                <input
+                  type="text"
+                  value={endereco}
+                  onChange={(e) => setEndereco(e.target.value)}
+                  className="w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-white outline-none transition focus:border-cyan-300/40"
+                  placeholder="Rua, avenida, travessa..."
+                />
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-white/85">
+                    Número
+                  </label>
+                  <input
+                    type="text"
+                    value={numero}
+                    onChange={(e) => setNumero(e.target.value)}
+                    className="w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-white outline-none transition focus:border-cyan-300/40"
+                    placeholder="123"
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-white/85">
+                    Complemento
+                  </label>
+                  <input
+                    type="text"
+                    value={complemento}
+                    onChange={(e) => setComplemento(e.target.value)}
+                    className="w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-white outline-none transition focus:border-cyan-300/40"
+                    placeholder="Apartamento, sala, bloco..."
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="mb-2 block text-sm font-medium text-white/85">
+                  Cupom de desconto
+                </label>
+                <input
+                  type="text"
+                  value={cupom}
+                  onChange={(e) => setCupom(e.target.value)}
+                  className="w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 uppercase text-white outline-none transition focus:border-cyan-300/40"
+                  placeholder="DIGITE SEU CÓDIGO DE CUPOM"
                 />
               </div>
 
