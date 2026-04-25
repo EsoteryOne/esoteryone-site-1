@@ -21,13 +21,6 @@ export default function LandingPageEmotionTab() {
   const [tempoAtual, setTempoAtual] = useState(0);
   const [erroVideo, setErroVideo] = useState(false);
 
-  const [mostrarFormularioCompra, setMostrarFormularioCompra] = useState(false);
-  const [nome, setNome] = useState("");
-  const [email, setEmail] = useState("");
-  const [telefone, setTelefone] = useState("");
-  const [carregandoCheckout, setCarregandoCheckout] = useState(false);
-  const [erroCheckout, setErroCheckout] = useState("");
-
   const [overlayVisivel, setOverlayVisivel] = useState(false);
   const [overlaySaindo, setOverlaySaindo] = useState(false);
 
@@ -64,62 +57,6 @@ async function iniciarVideoComSom() {
   }
 }
 
-
-
-  async function iniciarCheckout() {
-    setErroCheckout("");
-
-    if (!nome.trim()) {
-      setErroCheckout("Campo nome obrigatório.");
-      return;
-    }
-
-    if (!email.trim()) {
-      setErroCheckout("Campo e-mail obrigatório.");
-      return;
-    }
-
-    if (!telefone.trim()) {
-      setErroCheckout("Campo telefone obrigatório.");
-      return;
-    }
-
-    try {
-      setCarregandoCheckout(true);
-
-      const resposta = await fetch("/api/checkout", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          nome,
-          email,
-          telefone,
-          slug_produto: "emotion-tab",
-        }),
-      });
-
-      const data = await resposta.json();
-
-      if (!resposta.ok) {
-        setErroCheckout(data.error || "Não foi possível iniciar o pagamento.");
-        setCarregandoCheckout(false);
-        return;
-      }
-
-      if (data.url) {
-        window.location.href = data.url;
-        return;
-      }
-
-      setErroCheckout("A Stripe não retornou a URL do checkout.");
-      setCarregandoCheckout(false);
-    } catch {
-      setErroCheckout("Ocorreu um erro ao iniciar o checkout.");
-      setCarregandoCheckout(false);
-    }
-  }
 
   function aoMoverNoBotao(evento: React.MouseEvent<HTMLButtonElement>) {
     const botao = botaoMagneticoRef.current;
@@ -359,7 +296,7 @@ async function iniciarVideoComSom() {
                 <div className="mt-6 flex items-center justify-center">
                   <button
                     type="button"
-                    onClick={() => setMostrarFormularioCompra(true)}
+                    onClick={() => (window.location.href = "/pagamento/emotion-tab")}
                     className="inline-flex items-center justify-center rounded-2xl bg-cyan-400 px-7 py-4 text-sm font-semibold text-[#031019] transition hover:scale-[1.02]"
                   >
                     Comprar agora
@@ -619,7 +556,7 @@ async function iniciarVideoComSom() {
               <div className="mt-8 flex items-center justify-center">
                 <button
                   type="button"
-                  onClick={() => setMostrarFormularioCompra(true)}
+                  onClick={() => (window.location.href = "/pagamento/emotion-tab")}
                   className="inline-flex items-center justify-center rounded-2xl bg-cyan-400 px-8 py-4 text-sm font-semibold text-[#031019] transition hover:scale-[1.02]"
                 >
                   Quero me tornar um terapeuta de destaque
@@ -630,89 +567,6 @@ async function iniciarVideoComSom() {
         </>
       )}
 
-      {mostrarFormularioCompra && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4">
-          <div className="w-full max-w-xl rounded-[2rem] border border-cyan-300/15 bg-[#07131d] p-6 shadow-[0_0_60px_rgba(34,211,238,0.12)] sm:p-8">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.25em] text-cyan-300">
-                  Próximo passo
-                </p>
-                <h3 className="mt-3 text-2xl font-semibold text-white">
-                  Bem-vindo à Era de Aquário
-                </h3>
-                <p className="mt-3 text-sm leading-7 text-white/65">
-                  Você está há um passo de evoluir.
-                </p>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => setMostrarFormularioCompra(false)}
-                className="rounded-full border border-white/10 px-3 py-1 text-sm text-white/70 transition hover:bg-white/5"
-              >
-                Fechar
-              </button>
-            </div>
-
-            <div className="mt-8 space-y-4">
-              <div>
-                <label className="mb-2 block text-sm font-medium text-white/85">
-                  Nome completo
-                </label>
-                <input
-                  type="text"
-                  value={nome}
-                  onChange={(e) => setNome(e.target.value)}
-                  className="w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-white outline-none transition focus:border-cyan-300/40"
-                  placeholder="Digite seu nome"
-                />
-              </div>
-
-              <div>
-                <label className="mb-2 block text-sm font-medium text-white/85">
-                  E-mail
-                </label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-white outline-none transition focus:border-cyan-300/40"
-                  placeholder="seunome@email.com"
-                />
-              </div>
-
-              <div>
-                <label className="mb-2 block text-sm font-medium text-white/85">
-                  Telefone
-                </label>
-                <input
-                  type="tel"
-                  value={telefone}
-                  onChange={(e) => setTelefone(e.target.value)}
-                  className="w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-white outline-none transition focus:border-cyan-300/40"
-                  placeholder="51 9 9999-9999"
-                />
-              </div>
-
-              {erroCheckout && (
-                <p className="text-sm text-red-300">{erroCheckout}</p>
-              )}
-
-              <button
-                type="button"
-                onClick={iniciarCheckout}
-                disabled={carregandoCheckout}
-                className="mt-2 inline-flex w-full items-center justify-center rounded-2xl bg-cyan-400 px-6 py-4 text-sm font-semibold text-[#031019] transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-70"
-              >
-                {carregandoCheckout
-                  ? "Abrindo checkout..."
-                  : "Continuar para o pagamento"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </main>
   );
 }

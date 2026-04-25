@@ -8,7 +8,8 @@ type MetodoPagamento = "cartao" | "pix";
 export default function PagamentoEmotionTabPage() {
   const router = useRouter();
 
-  const [metodoPagamento, setMetodoPagamento] = useState<MetodoPagamento>("cartao");
+  const [metodoPagamento, setMetodoPagamento] =
+    useState<MetodoPagamento>("cartao");
   const [carregando, setCarregando] = useState(false);
   const [erro, setErro] = useState("");
   const [codigoPedido, setCodigoPedido] = useState("");
@@ -39,28 +40,26 @@ export default function PagamentoEmotionTabPage() {
 
   const valorOriginalCentavos = 95600;
 
-const cuponsPorCodigo: Record<string, number> = {
-  LANCA20: 99,
-};
+  const cuponsPorCodigo: Record<string, number> = {
+    LANCA20: 99,
+  };
 
-const cupomNormalizado = dados.cupom.trim().toUpperCase();
-const percentualDesconto = cuponsPorCodigo[cupomNormalizado] ?? 0;
+  const cupomNormalizado = dados.cupom.trim().toUpperCase();
+  const percentualDesconto = cuponsPorCodigo[cupomNormalizado] ?? 0;
 
-const valorFinalCentavos = Math.round(
-  valorOriginalCentavos * (1 - percentualDesconto / 100)
-);
+  const valorFinalCentavos = Math.round(
+    valorOriginalCentavos * (1 - percentualDesconto / 100)
+  );
 
-const valorOriginalFormatado = (valorOriginalCentavos / 100).toLocaleString(
-  "pt-BR",
-  { style: "currency", currency: "BRL" }
-);
+  const valorOriginalFormatado = (valorOriginalCentavos / 100).toLocaleString(
+    "pt-BR",
+    { style: "currency", currency: "BRL" }
+  );
 
-const valorFinalFormatado = (valorFinalCentavos / 100).toLocaleString(
-  "pt-BR",
-  { style: "currency", currency: "BRL" }
-);
-
-
+  const valorFinalFormatado = (valorFinalCentavos / 100).toLocaleString(
+    "pt-BR",
+    { style: "currency", currency: "BRL" }
+  );
 
   function atualizarCampo(campo: string, valor: string) {
     setDados((atual) => ({ ...atual, [campo]: valor }));
@@ -196,6 +195,16 @@ const valorFinalFormatado = (valorFinalCentavos / 100).toLocaleString(
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_top,rgba(34,211,238,0.14),transparent_22%),linear-gradient(180deg,#06111f_0%,#071827_30%,#0a2233_100%)] px-5 py-10 text-cyan-50">
       <section className="mx-auto max-w-5xl rounded-[2rem] border border-cyan-300/20 bg-cyan-400/10 p-6 shadow-2xl backdrop-blur-2xl md:p-10">
+        <div className="relative mb-8 overflow-hidden rounded-3xl border border-cyan-300/20 bg-black/30 shadow-2xl">
+          <img
+            src="/imagens/banner-emotiontab.webp"
+            alt="Banner do Emotion Tab"
+            className="h-auto w-full object-cover"
+          />
+
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#06111f]/70 via-transparent to-transparent" />
+        </div>
+
         <p className="mb-3 text-sm uppercase tracking-[0.35em] text-cyan-300/80">
           EsoteryOne
         </p>
@@ -205,8 +214,8 @@ const valorFinalFormatado = (valorFinalCentavos / 100).toLocaleString(
         </h1>
 
         <p className="mt-4 max-w-2xl text-cyan-50/70">
-          Preencha seus dados e finalize o pagamento. O cartão aparece primeiro.
-          Caso prefira, você pode trocar para Pix.
+          Finalize seu pagamento e obtenha seu acesso ao EmotionTab e todas as
+          atualizações por um ano.
         </p>
 
         <div className="mt-8 grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
@@ -259,21 +268,22 @@ const valorFinalFormatado = (valorFinalCentavos / 100).toLocaleString(
                 <input className="campo" placeholder="Mês, exemplo 12" value={dados.mesExpiracao} onChange={(e) => atualizarCampo("mesExpiracao", e.target.value)} />
                 <input className="campo" placeholder="Ano, exemplo 2030" value={dados.anoExpiracao} onChange={(e) => atualizarCampo("anoExpiracao", e.target.value)} />
                 <input className="campo" placeholder="CVV" value={dados.cvv} onChange={(e) => atualizarCampo("cvv", e.target.value)} />
-                <select
-                    className="campo"
-                    value={dados.parcelas}
-                    onChange={(e) => atualizarCampo("parcelas", e.target.value)}
-                    >
-                    {Array.from({ length: 12 }, (_, index) => {
-                        const parcela = index + 1;
 
-                        return (
-                        <option key={parcela} value={parcela}>
-                            {parcela} {parcela === 1 ? "parcela" : "parcelas"}
-                        </option>
-                        );
-                    })}
-                    </select>
+                <select
+                  className="campo"
+                  value={dados.parcelas}
+                  onChange={(e) => atualizarCampo("parcelas", e.target.value)}
+                >
+                  {Array.from({ length: 12 }, (_, index) => {
+                    const parcela = index + 1;
+
+                    return (
+                      <option key={parcela} value={parcela}>
+                        {parcela} {parcela === 1 ? "parcela" : "parcelas"}
+                      </option>
+                    );
+                  })}
+                </select>
               </div>
             )}
 
@@ -305,25 +315,29 @@ const valorFinalFormatado = (valorFinalCentavos / 100).toLocaleString(
                 <span>Produto</span>
                 <strong>Emotion Tab</strong>
               </div>
+
               <div className="flex justify-between">
                 <span>Valor original</span>
                 <strong>{valorOriginalFormatado}</strong>
-                </div>
+              </div>
 
-                {percentualDesconto > 0 && (
+              {percentualDesconto > 0 && (
                 <div className="flex justify-between text-cyan-200">
-                    <span>Cupom aplicado</span>
-                    <strong>{percentualDesconto}% OFF</strong>
+                  <span>Cupom aplicado</span>
+                  <strong>{percentualDesconto}% OFF</strong>
                 </div>
-                )}
+              )}
 
-                <div className="flex justify-between text-lg text-cyan-100">
+              <div className="flex justify-between text-lg text-cyan-100">
                 <span>Total</span>
                 <strong>{valorFinalFormatado}</strong>
-                </div>
+              </div>
+
               <div className="flex justify-between">
                 <span>Pagamento</span>
-                <strong>{metodoPagamento === "cartao" ? "Cartão" : "Pix"}</strong>
+                <strong>
+                  {metodoPagamento === "cartao" ? "Cartão" : "Pix"}
+                </strong>
               </div>
             </div>
 
@@ -357,7 +371,9 @@ const valorFinalFormatado = (valorFinalCentavos / 100).toLocaleString(
 
                         <button
                           type="button"
-                          onClick={() => navigator.clipboard.writeText(copiaCola)}
+                          onClick={() =>
+                            navigator.clipboard.writeText(copiaCola)
+                          }
                           className="mt-3 w-full rounded-xl border border-cyan-300/30 px-4 py-3 text-sm font-semibold text-cyan-100"
                         >
                           Copiar código Pix

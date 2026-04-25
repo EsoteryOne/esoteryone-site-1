@@ -76,7 +76,9 @@ export async function POST(req: Request) {
             <div style="max-width:600px;margin:0 auto;background:#071827;border-radius:20px;padding:30px;border:1px solid rgba(34,211,238,0.2);">
               <p style="font-size:12px;letter-spacing:3px;color:#22d3ee;text-transform:uppercase;">EsoteryOne</p>
               <h1 style="font-size:26px;margin-top:10px;">Pagamento confirmado</h1>
-              <p style="margin-top:20px;color:#cde7f5;">Seu acesso ao <strong>${nomeProduto}</strong> está liberado.</p>
+              <p style="margin-top:20px;color:#cde7f5;">
+              Seu acesso ao <strong>${nomeProduto}</strong> foi liberado com validade de <strong>1 ano completo</strong>.
+            </p>
               <p style="margin-top:10px;color:#9fbccc;">Clique no botão abaixo para acessar imediatamente:</p>
               <div style="text-align:center;margin:30px 0;">
                 <a href="${linkAcesso}" style="background:#22d3ee;color:#031018;padding:14px 28px;border-radius:999px;text-decoration:none;font-weight:bold;display:inline-block;">
