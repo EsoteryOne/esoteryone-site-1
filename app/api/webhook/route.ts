@@ -1,232 +1,115 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import nodemailer from "nodemailer";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-function pegarCodigoPedido(dados: any) {
-  return (
-    dados?.order?.code ??
-    dados?.code ??
-    dados?.order_code ??
-    dados?.charge?.order?.code ??
-    dados?.charges?.[0]?.order?.code ??
-    null
-  );
-}
-
-function pegarIdEvento(evento: any, dados: any) {
-  return evento?.id ?? dados?.id ?? dados?.code ?? null;
-}
-
-function pegarIdPedido(dados: any) {
-  return dados?.order?.id ?? dados?.id ?? null;
-}
-
-function pegarIdCobranca(dados: any) {
-  return dados?.charge?.id ?? dados?.charges?.[0]?.id ?? dados?.id ?? null;
-}
-
-function pegarMetodoPagamento(dados: any) {
-  return (
-    dados?.payment_method ??
-    dados?.charge?.payment_method ??
-    dados?.charges?.[0]?.payment_method ??
-    "desconhecido"
-  );
-}
-
-function pegarValorPagoCentavos(dados: any, lead: any) {
-  return Number(
-    dados?.amount ??
-      dados?.paid_amount ??
-      dados?.charge?.amount ??
-      dados?.charges?.[0]?.amount ??
-      lead?.valor_final_centavos ??
-      0
-  );
-}
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.EMAIL_REMETENTE,
+    pass: process.env.EMAIL_SENHA_APP,
+  },
+});
 
 export async function POST(req: Request) {
   try {
-    const evento = await req.json();
+    const body = await req.json();
 
-    console.log("========== WEBHOOK PAGAR.ME ==========");
-    console.log(JSON.stringify(evento, null, 2));
-    console.log("======================================");
-
-    const tipoEvento = evento?.type || evento?.event;
-    const dados = evento?.data;
-
-    const eventosPagos = ["order.paid", "charge.paid", "payment.paid"];
-
-    if (!eventosPagos.includes(tipoEvento)) {
-      return NextResponse.json({
-        received: true,
-        ignored: true,
-        type: tipoEvento,
-      });
-    }
-
-    const codigoPedido = pegarCodigoPedido(dados);
+    const evento = body.type;
+    const pedido = body.data;
+    const codigoPedido = pedido?.code || pedido?.order?.code;
 
     if (!codigoPedido) {
-      console.error("Webhook sem código do pedido:", dados);
-      return NextResponse.json(
-        { error: "Webhook sem código do pedido." },
-        { status: 400 }
-      );
+      return NextResponse.json({ ok: true });
     }
 
-    const { data: lead, error: erroLeadBusca } = await supabase
+    const { data: lead } = await supabase
       .from("leads")
       .select("*")
       .eq("codigo_pedido_pagarme", codigoPedido)
       .maybeSingle();
 
-    if (erroLeadBusca || !lead) {
-      console.error("Lead não encontrado para o pedido:", codigoPedido);
-      return NextResponse.json(
-        { error: "Lead não encontrado para este pedido." },
-        { status: 400 }
-      );
+    if (!lead) {
+      return NextResponse.json({ ok: true });
     }
 
-    const email = lead.email;
-    const nome = lead.nome;
-    const telefone = lead.telefone;
-    const produto_id = lead.produto_id;
+    if (evento === "order.paid" || evento === "charge.paid") {
+      const { data: compraExistente } = await supabase
+        .from("compras")
+        .select("id")
+        .eq("codigo_pedido_pagarme", codigoPedido)
+        .maybeSingle();
 
-    const idEvento = pegarIdEvento(evento, dados);
-    const idPedido = pegarIdPedido(dados);
-    const idCobranca = pegarIdCobranca(dados);
-    const metodoPagamento = pegarMetodoPagamento(dados);
-    const valorPagoCentavos = pegarValorPagoCentavos(dados, lead);
-
-    const { data: usuarioExistente, error: erroBuscaUsuario } = await supabase
-      .from("usuarios")
-      .select("*")
-      .eq("email", email)
-      .maybeSingle();
-
-    if (erroBuscaUsuario) {
-      console.error("Erro ao buscar usuário:", erroBuscaUsuario);
-      return NextResponse.json(
-        { error: "Erro ao buscar usuário." },
-        { status: 500 }
-      );
-    }
-
-    let usuarioId = usuarioExistente?.id;
-
-    if (!usuarioId) {
-      const { data: novoUsuario, error: erroUsuario } = await supabase
-        .from("usuarios")
-        .insert([
-          {
-            nome,
-            email,
-            telefone,
-            acesso_liberado: true,
-          },
-        ])
-        .select("*")
-        .single();
-
-      if (erroUsuario) {
-        console.error("Erro ao criar usuário:", erroUsuario);
-        return NextResponse.json(
-          { error: "Erro ao criar usuário." },
-          { status: 500 }
-        );
-      }
-
-      usuarioId = novoUsuario.id;
-    } else {
-      const { error: erroAtualizarUsuario } = await supabase
-        .from("usuarios")
-        .update({
-          nome,
-          telefone,
-          acesso_liberado: true,
-        })
-        .eq("id", usuarioId);
-
-      if (erroAtualizarUsuario) {
-        console.error("Erro ao atualizar usuário:", erroAtualizarUsuario);
-        return NextResponse.json(
-          { error: "Erro ao atualizar usuário." },
-          { status: 500 }
-        );
-      }
-    }
-
-    const { data: compraExistente, error: erroBuscaCompra } = await supabase
-      .from("compras")
-      .select("id")
-      .eq("codigo_pedido_pagarme", codigoPedido)
-      .maybeSingle();
-
-    if (erroBuscaCompra) {
-      console.error("Erro ao buscar compra:", erroBuscaCompra);
-      return NextResponse.json(
-        { error: "Erro ao buscar compra." },
-        { status: 500 }
-      );
-    }
-
-    if (!compraExistente) {
-      const { error: erroCompra } = await supabase.from("compras").insert([
-        {
-          usuario_id: usuarioId,
-          produto_id,
+      if (!compraExistente) {
+        await supabase.from("compras").insert({
+          usuario_id: null,
+          produto_id: lead.produto_id,
           status: "pago",
-          email_compra: email,
-
-          id_pagarme_evento: idEvento ? String(idEvento) : null,
-          id_pagarme_checkout: codigoPedido,
+          data_compra: new Date().toISOString(),
+          email_compra: lead.email,
           codigo_pedido_pagarme: codigoPedido,
-          id_pagarme_pedido: idPedido ? String(idPedido) : null,
-          id_pagarme_cobranca: idCobranca ? String(idCobranca) : null,
-
-          valor_pago_centavos: valorPagoCentavos,
-          cupom_usado: lead.cupom_usado || null,
-          metodo_pagamento: metodoPagamento,
-        },
-      ]);
-
-      if (erroCompra) {
-        console.error("Erro ao registrar compra:", erroCompra);
-        return NextResponse.json(
-          { error: "Erro ao registrar compra." },
-          { status: 500 }
-        );
+          valor_pago_centavos: lead.valor_final_centavos,
+          metodo_pagamento: pedido?.payment_method || "pagarme",
+        });
       }
+
+      const { data: produto } = await supabase
+        .from("produtos")
+        .select("nome, slug")
+        .eq("id", lead.produto_id)
+        .maybeSingle();
+
+      const nomeProduto = produto?.nome || "seu produto";
+      const slugProduto = produto?.slug || lead.slug_produto || "emotion-tab";
+      const linkAcesso = `${process.env.NEXT_PUBLIC_SITE_URL}/sucesso/${slugProduto}`;
+
+      await transporter.sendMail({
+        from: `"EsoteryOne" <${process.env.EMAIL_REMETENTE}>`,
+        to: lead.email,
+        subject: `Seu acesso ao ${nomeProduto}`,
+        html: `
+          <div style="background:#030712;padding:40px 20px;font-family:Arial,sans-serif;color:#e6f6ff;">
+            <div style="max-width:600px;margin:0 auto;background:#071827;border-radius:20px;padding:30px;border:1px solid rgba(34,211,238,0.2);">
+              <p style="font-size:12px;letter-spacing:3px;color:#22d3ee;text-transform:uppercase;">EsoteryOne</p>
+              <h1 style="font-size:26px;margin-top:10px;">Pagamento confirmado</h1>
+              <p style="margin-top:20px;color:#cde7f5;">Seu acesso ao <strong>${nomeProduto}</strong> está liberado.</p>
+              <p style="margin-top:10px;color:#9fbccc;">Clique no botão abaixo para acessar imediatamente:</p>
+              <div style="text-align:center;margin:30px 0;">
+                <a href="${linkAcesso}" style="background:#22d3ee;color:#031018;padding:14px 28px;border-radius:999px;text-decoration:none;font-weight:bold;display:inline-block;">
+                  Acessar agora
+                </a>
+              </div>
+              <div style="margin-top:30px;padding-top:20px;border-top:1px solid rgba(255,255,255,0.1);font-size:13px;color:#7aa6b8;">
+                Se você tiver qualquer dúvida, responda este email.
+              </div>
+            </div>
+          </div>
+        `,
+      });
+
+      await supabase
+        .from("leads")
+        .update({ status: "pago" })
+        .eq("codigo_pedido_pagarme", codigoPedido);
     }
 
-    await supabase
-      .from("leads")
-      .update({ status: "pago" })
-      .eq("codigo_pedido_pagarme", codigoPedido);
+    if (evento === "order.payment_failed" || evento === "charge.payment_failed") {
+      await supabase
+        .from("leads")
+        .update({
+          status: "falhou",
+          erro_pagamento: "Pagamento recusado pelo emissor.",
+        })
+        .eq("codigo_pedido_pagarme", codigoPedido);
+    }
 
-    return NextResponse.json({
-      received: true,
-      paid: true,
-      codigoPedido,
-      usuario_id: usuarioId,
-      produto_id,
-    });
-  } catch (err: any) {
-    console.error("Erro webhook Pagar.me:", err);
-
-    return NextResponse.json(
-      {
-        error: "Erro no webhook.",
-        detalhe: err?.message,
-      },
-      { status: 500 }
-    );
+    return NextResponse.json({ ok: true });
+  } catch (error) {
+    console.error("Erro webhook:", error);
+    return NextResponse.json({ ok: true });
   }
 }

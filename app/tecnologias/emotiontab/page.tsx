@@ -1,123 +1,6 @@
 "use client";
 
-import { useState } from "react";
-
-export default function PaginaEmotionTab() {
-  const [mostrarFormularioCompra, setMostrarFormularioCompra] = useState(false);
-  const [nome, setNome] = useState("");
-  const [email, setEmail] = useState("");
-  const [telefone, setTelefone] = useState("");
-  const [cpf, setCpf] = useState("");
-  const [cep, setCep] = useState("");
-  const [estado, setEstado] = useState("");
-  const [cidade, setCidade] = useState("");
-  const [bairro, setBairro] = useState("");
-  const [endereco, setEndereco] = useState("");
-  const [numero, setNumero] = useState("");
-  const [complemento, setComplemento] = useState("");
-  const [cupom, setCupom] = useState("");
-  const [carregandoCheckout, setCarregandoCheckout] = useState(false);
-  const [erroCheckout, setErroCheckout] = useState("");
-
-  async function iniciarCheckout() {
-    setErroCheckout("");
-
-    if (!nome.trim()) {
-      setErroCheckout("Campo nome obrigatório.");
-      return;
-    }
-
-    if (!email.trim()) {
-      setErroCheckout("Campo e-mail obrigatório.");
-      return;
-    }
-
-    if (!telefone.trim()) {
-      setErroCheckout("Campo telefone obrigatório.");
-      return;
-    }
-
-    if (!cpf.trim()) {
-      setErroCheckout("Campo CPF obrigatório.");
-      return;
-    }
-
-    if (!cep.trim()) {
-      setErroCheckout("Campo CEP obrigatório.");
-      return;
-    }
-
-    if (!estado.trim()) {
-      setErroCheckout("Campo estado obrigatório.");
-      return;
-    }
-
-    if (!cidade.trim()) {
-      setErroCheckout("Campo cidade obrigatório.");
-      return;
-    }
-
-    if (!bairro.trim()) {
-      setErroCheckout("Campo bairro obrigatório.");
-      return;
-    }
-
-    if (!endereco.trim()) {
-      setErroCheckout("Campo endereço obrigatório.");
-      return;
-    }
-
-    if (!numero.trim()) {
-      setErroCheckout("Campo número obrigatório.");
-      return;
-    }
-
-    try {
-      setCarregandoCheckout(true);
-
-      const resposta = await fetch("/api/checkout", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          nome,
-          email,
-          telefone,
-          cpf,
-          cep,
-          estado,
-          cidade,
-          bairro,
-          endereco,
-          numero,
-          complemento,
-          cupom,
-          slug_produto: "emotion-tab",
-        }),
-      });
-
-      const data = await resposta.json();
-
-      if (!resposta.ok) {
-        setErroCheckout(data.error || "Não foi possível iniciar o pagamento.");
-        setCarregandoCheckout(false);
-        return;
-      }
-
-      if (data.url) {
-        window.location.href = data.url;
-        return;
-      }
-
-      setErroCheckout("O Pagar.me não retornou a URL do checkout.");
-      setCarregandoCheckout(false);
-    } catch {
-      setErroCheckout("Ocorreu um erro ao iniciar o checkout.");
-      setCarregandoCheckout(false);
-    }
-  }
-
+export default function EmotionTabPage() {
   return (
     <main className="min-h-screen bg-[#030712] text-white">
       <div className="mx-auto max-w-6xl px-6 py-20">
@@ -140,7 +23,7 @@ export default function PaginaEmotionTab() {
           <div className="mt-10 flex flex-col items-center gap-4">
             <button
               type="button"
-              onClick={() => setMostrarFormularioCompra(true)}
+              onClick={() => (window.location.href = "/pagamento/emotion-tab")}
               className="rounded-full bg-cyan-300 px-10 py-4 text-lg font-medium text-[#031018] transition hover:brightness-110"
             >
               Quero acessar o Emotion Tab
@@ -204,7 +87,7 @@ export default function PaginaEmotionTab() {
 
         <div className="mt-24 rounded-2xl border border-cyan-300/20 bg-cyan-300/10 p-10 text-center backdrop-blur-xl">
           <h2 className="text-2xl font-semibold text-cyan-200">
-            Você não será mais um terapeuta comum
+            Você será visto como um terapeuta do futuro
           </h2>
 
           <p className="mx-auto mt-4 max-w-2xl text-cyan-100/80">
@@ -225,7 +108,7 @@ export default function PaginaEmotionTab() {
           <div className="mt-8">
             <button
               type="button"
-              onClick={() => setMostrarFormularioCompra(true)}
+              onClick={() => (window.location.href = "/pagamento/emotion-tab")}
               className="rounded-full bg-cyan-300 px-10 py-4 text-lg font-medium text-[#031018] transition hover:brightness-110"
             >
               Acessar Emotion Tab agora
@@ -233,215 +116,6 @@ export default function PaginaEmotionTab() {
           </div>
         </div>
       </div>
-
-      {mostrarFormularioCompra && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/70 px-4 py-8">
-          <div className="w-full max-w-2xl rounded-[2rem] border border-cyan-300/15 bg-[#07131d] p-6 shadow-[0_0_60px_rgba(34,211,238,0.12)] sm:p-8">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.25em] text-cyan-300">
-                  Próximo passo
-                </p>
-
-                <h3 className="mt-3 text-2xl font-semibold text-white">
-                  Finalize seu acesso ao Emotion Tab
-                </h3>
-
-                <p className="mt-3 text-sm leading-7 text-white/65">
-                  Preencha seus dados para seguir ao pagamento.
-                </p>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => setMostrarFormularioCompra(false)}
-                className="rounded-full border border-white/10 px-3 py-1 text-sm text-white/70 transition hover:bg-white/5"
-              >
-                Fechar
-              </button>
-            </div>
-
-            <div className="mt-8 space-y-4">
-              <div>
-                <label className="mb-2 block text-sm font-medium text-white/85">
-                  Nome completo
-                </label>
-                <input
-                  type="text"
-                  value={nome}
-                  onChange={(e) => setNome(e.target.value)}
-                  className="w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-white outline-none transition focus:border-cyan-300/40"
-                  placeholder="Digite seu nome"
-                />
-              </div>
-
-              <div>
-                <label className="mb-2 block text-sm font-medium text-white/85">
-                  E-mail
-                </label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-white outline-none transition focus:border-cyan-300/40"
-                  placeholder="seunome@email.com"
-                />
-              </div>
-
-              <div>
-                <label className="mb-2 block text-sm font-medium text-white/85">
-                  Telefone com DDD
-                </label>
-                <input
-                  type="tel"
-                  value={telefone}
-                  onChange={(e) => setTelefone(e.target.value)}
-                  className="w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-white outline-none transition focus:border-cyan-300/40"
-                  placeholder="51 9 9999-9999"
-                />
-              </div>
-
-              <div>
-                <label className="mb-2 block text-sm font-medium text-white/85">
-                  CPF
-                </label>
-                <input
-                  type="text"
-                  value={cpf}
-                  onChange={(e) => setCpf(e.target.value)}
-                  className="w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-white outline-none transition focus:border-cyan-300/40"
-                  placeholder="000.000.000-00"
-                />
-              </div>
-
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div>
-                  <label className="mb-2 block text-sm font-medium text-white/85">
-                    CEP
-                  </label>
-                  <input
-                    type="text"
-                    value={cep}
-                    onChange={(e) => setCep(e.target.value)}
-                    className="w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-white outline-none transition focus:border-cyan-300/40"
-                    placeholder="00000-000"
-                  />
-                </div>
-
-                <div>
-                  <label className="mb-2 block text-sm font-medium text-white/85">
-                    Estado
-                  </label>
-                  <input
-                    type="text"
-                    value={estado}
-                    onChange={(e) => setEstado(e.target.value)}
-                    className="w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-white outline-none transition focus:border-cyan-300/40"
-                    placeholder="RS"
-                  />
-                </div>
-              </div>
-
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div>
-                  <label className="mb-2 block text-sm font-medium text-white/85">
-                    Cidade
-                  </label>
-                  <input
-                    type="text"
-                    value={cidade}
-                    onChange={(e) => setCidade(e.target.value)}
-                    className="w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-white outline-none transition focus:border-cyan-300/40"
-                    placeholder="Porto Alegre"
-                  />
-                </div>
-
-                <div>
-                  <label className="mb-2 block text-sm font-medium text-white/85">
-                    Bairro
-                  </label>
-                  <input
-                    type="text"
-                    value={bairro}
-                    onChange={(e) => setBairro(e.target.value)}
-                    className="w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-white outline-none transition focus:border-cyan-300/40"
-                    placeholder="Centro"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="mb-2 block text-sm font-medium text-white/85">
-                  Endereço
-                </label>
-                <input
-                  type="text"
-                  value={endereco}
-                  onChange={(e) => setEndereco(e.target.value)}
-                  className="w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-white outline-none transition focus:border-cyan-300/40"
-                  placeholder="Rua, avenida, travessa..."
-                />
-              </div>
-
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div>
-                  <label className="mb-2 block text-sm font-medium text-white/85">
-                    Número
-                  </label>
-                  <input
-                    type="text"
-                    value={numero}
-                    onChange={(e) => setNumero(e.target.value)}
-                    className="w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-white outline-none transition focus:border-cyan-300/40"
-                    placeholder="123"
-                  />
-                </div>
-
-                <div>
-                  <label className="mb-2 block text-sm font-medium text-white/85">
-                    Complemento
-                  </label>
-                  <input
-                    type="text"
-                    value={complemento}
-                    onChange={(e) => setComplemento(e.target.value)}
-                    className="w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-white outline-none transition focus:border-cyan-300/40"
-                    placeholder="Apartamento, sala, bloco..."
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="mb-2 block text-sm font-medium text-white/85">
-                  Cupom de desconto
-                </label>
-                <input
-                  type="text"
-                  value={cupom}
-                  onChange={(e) => setCupom(e.target.value)}
-                  className="w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 uppercase text-white outline-none transition focus:border-cyan-300/40"
-                  placeholder="DIGITE SEU CÓDIGO DE CUPOM"
-                />
-              </div>
-
-              {erroCheckout && (
-                <p className="text-sm text-red-300">{erroCheckout}</p>
-              )}
-
-              <button
-                type="button"
-                onClick={iniciarCheckout}
-                disabled={carregandoCheckout}
-                className="mt-2 inline-flex w-full items-center justify-center rounded-2xl bg-cyan-400 px-6 py-4 text-sm font-semibold text-[#031019] transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-70"
-              >
-                {carregandoCheckout
-                  ? "Abrindo checkout..."
-                  : "Continuar para o pagamento"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </main>
   );
 }

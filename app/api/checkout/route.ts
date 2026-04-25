@@ -11,7 +11,7 @@ const precosPorProduto: Record<string, number> = {
 };
 
 const cuponsPorCodigo: Record<string, number> = {
-  LANCA20: 99.9,
+  LANCA20: 99,
 };
 
 function limparNumeros(valor: string) {
@@ -24,9 +24,7 @@ function gerarCodigoPedido(slugProduto: string) {
 
 function calcularValorComCupom(valorOriginalCentavos: number, cupomNormalizado: string) {
   const percentualDesconto = cuponsPorCodigo[cupomNormalizado] ?? 0;
-  const valorFinalCentavos = Math.round(
-    valorOriginalCentavos * (1 - percentualDesconto / 100)
-  );
+  const valorFinalCentavos = Math.round(valorOriginalCentavos * (1 - percentualDesconto / 100));
 
   return { percentualDesconto, valorFinalCentavos };
 }
@@ -49,6 +47,9 @@ export async function POST(req: Request) {
       complemento,
       cupom,
       slug_produto,
+      metodo_pagamento,
+      card_token,
+      parcelas,
     } = body;
 
     if (
@@ -62,10 +63,25 @@ export async function POST(req: Request) {
       !bairro ||
       !endereco ||
       !numero ||
-      !slug_produto
+      !slug_produto ||
+      !metodo_pagamento
     ) {
       return NextResponse.json(
         { error: "Dados obrigatórios não enviados." },
+        { status: 400 }
+      );
+    }
+
+    if (!["cartao", "pix"].includes(metodo_pagamento)) {
+      return NextResponse.json(
+        { error: "Método de pagamento inválido." },
+        { status: 400 }
+      );
+    }
+
+    if (metodo_pagamento === "cartao" && !card_token) {
+      return NextResponse.json(
+        { error: "Token do cartão não enviado." },
         { status: 400 }
       );
     }
@@ -85,7 +101,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Cupom inválido." }, { status: 400 });
     }
 
-    const { percentualDesconto, valorFinalCentavos } = calcularValorComCupom(
+    const { valorFinalCentavos } = calcularValorComCupom(
       valorOriginalCentavos,
       cupomNormalizado
     );
@@ -116,28 +132,49 @@ export async function POST(req: Request) {
     const codigoPedido = gerarCodigoPedido(slug_produto);
 
     const { error: erroLead } = await supabase.from("leads").insert([
-  {
-    nome,
-    email,
-    telefone,
-    slug_produto,
-    produto_id: produto.id,
-    codigo_pedido_pagarme: codigoPedido,
-    valor_final_centavos: valorFinalCentavos,
-    cupom_usado: cupomNormalizado || null,
-    status: "checkout",
-  },
-]);
+      {
+        nome,
+        email,
+        telefone,
+        slug_produto,
+        produto_id: produto.id,
+        codigo_pedido_pagarme: codigoPedido,
+        valor_final_centavos: valorFinalCentavos,
+        cupom_usado: cupomNormalizado || null,
+        status: "checkout",
+      },
+    ]);
 
-if (erroLead) {
-  console.error("Erro ao salvar lead:", erroLead);
-  return NextResponse.json(
-    { error: "Erro ao salvar lead." },
-    { status: 500 }
-  );
-}
+    if (erroLead) {
+      console.error("Erro ao salvar lead:", erroLead);
+      return NextResponse.json(
+        { error: "Erro ao salvar lead." },
+        { status: 500 }
+      );
+    }
 
-    const resposta = await fetch("https://api.pagar.me/core/v5/paymentlinks", {
+    const payments =
+      metodo_pagamento === "pix"
+        ? [
+            {
+              payment_method: "pix",
+              pix: {
+                expires_in: 3600,
+              },
+            },
+          ]
+        : [
+            {
+              payment_method: "credit_card",
+              credit_card: {
+                operation_type: "auth_and_capture",
+                card_token,
+                installments: Number(parcelas || 1),
+              },
+            },
+          ];
+
+    const resposta = await fetch("https://api.pagar.me/core/v5/orders", {
       method: "POST",
       headers: {
         Authorization:
@@ -147,93 +184,37 @@ if (erroLead) {
         Accept: "application/json",
       },
       body: JSON.stringify({
-        type: "order",
-        name:
-          percentualDesconto > 0
-            ? `${produto.nome} - Cupom ${cupomNormalizado}`
-            : produto.nome,
-        order_code: codigoPedido,
-        max_paid_sessions: 1,
-
-        checkout_settings: {
-          success_url: `${process.env.NEXT_PUBLIC_SITE_URL}/sucesso/${slug_produto}`,
-          cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL}/cancelado`,
-        },
-
-        customer_settings: {
-          customer: {
-            name: nome,
-            email,
-            document: cpfLimpo,
-            type: "individual",
-            phones: {
-              mobile_phone: {
-                country_code: "55",
-                area_code: telefoneLimpo.slice(0, 2),
-                number: telefoneLimpo.slice(2),
-              },
-            },
-            address: {
-              country: "BR",
-              state: estado,
-              city: cidade,
-              zip_code: cepLimpo,
-              line_1: `${numero}, ${endereco}, ${bairro}`,
-              line_2: complemento || "",
-            },
-          },
-        },
-
-        payment_settings: {
-          accepted_payment_methods: ["credit_card", "pix"],
-          credit_card_settings: {
-            operation_type: "auth_and_capture",
-            installments_setup: {
-              max_installments: 12,
-              amount: valorFinalCentavos,
-              interest_type: "Simple",
-              interest_rate: 0,
-            },
-          },
-          pix_settings: {
-            expires_in: 3600,
-          },
-        },
-
-        cart_settings: {
-          items: [
-            {
-              name:
-                percentualDesconto > 0
-                  ? `${produto.nome} - Cupom ${cupomNormalizado}`
-                  : produto.nome,
-              amount: valorFinalCentavos,
-              default_quantity: 1,
-            },
-          ],
-        },
-
-        metadata: {
-          nome,
+        code: codigoPedido,
+        customer: {
+          name: nome,
           email,
-          telefone,
-          cpf: cpfLimpo,
-          cep: cepLimpo,
-          estado,
-          cidade,
-          bairro,
-          endereco,
-          numero,
-          complemento,
-          slug_produto,
-          produto_id: produto.id,
-          cupom: cupomNormalizado || null,
-          percentual_desconto: percentualDesconto,
-          valor_original_centavos: valorOriginalCentavos,
-          valor_final_centavos: valorFinalCentavos,
-          codigo_pedido: codigoPedido,
-          origem: "site-esoteryone",
+          document: cpfLimpo,
+          type: "individual",
+          phones: {
+            mobile_phone: {
+              country_code: "55",
+              area_code: telefoneLimpo.slice(0, 2),
+              number: telefoneLimpo.slice(2),
+            },
+          },
+          address: {
+            country: "BR",
+            state: estado,
+            city: cidade,
+            zip_code: cepLimpo,
+            line_1: `${numero}, ${endereco}, ${bairro}`,
+            line_2: complemento || "",
+          },
         },
+        items: [
+          {
+            amount: valorFinalCentavos,
+            description: produto.nome,
+            quantity: 1,
+            code: produto.slug || slug_produto,
+          },
+        ],
+        payments,
       }),
     });
 
@@ -242,25 +223,26 @@ if (erroLead) {
     if (!resposta.ok) {
       console.error("Erro Pagar.me:", JSON.stringify(dados, null, 2));
       return NextResponse.json(
-        { error: "Erro ao criar checkout no Pagar.me.", detalhe: dados },
+        { error: "Erro ao criar pedido no Pagar.me.", detalhe: dados },
         { status: 500 }
       );
     }
 
-    const url =
-      dados.url ??
-      dados.payment_url ??
-      dados.checkout_url ??
-      dados.payment_link_url;
+    const cobranca = dados.charges?.[0];
+    const transacao = cobranca?.last_transaction;
 
-    if (!url) {
-      return NextResponse.json(
-        { error: "O Pagar.me não retornou a URL do checkout.", detalhe: dados },
-        { status: 500 }
-      );
-    }
-
-    return NextResponse.json({ url });
+    return NextResponse.json({
+      tipo: metodo_pagamento,
+      codigo_pedido_pagarme: codigoPedido,
+      id_pagarme_pedido: dados.id,
+      id_pagarme_cobranca: cobranca?.id || null,
+      status: dados.status,
+      valor_final_centavos: valorFinalCentavos,
+      slug_produto,
+      qr_code: transacao?.qr_code || null,
+      qr_code_url: transacao?.qr_code_url || null,
+      copia_cola: transacao?.qr_code || null,
+    });
   } catch (err: any) {
     console.error("Erro completo:", err);
     return NextResponse.json(
