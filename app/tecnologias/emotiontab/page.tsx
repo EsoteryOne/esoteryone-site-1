@@ -2,7 +2,7 @@
 
 export default function EmotionTabPage() {
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top,rgba(34,211,238,0.12),transparent_25%),#030712] text-white">
+    <main className="min-h-screen bg-[radial-gradient(circle_at_top,rgba(34,211,238,0.14),transparent_22%),linear-gradient(180deg,#06111f_0%,#071827_30%,#0a2233_100%)] text-white">
       <div className="mx-auto max-w-6xl px-6 py-20">
 
         {/* HERO */}
