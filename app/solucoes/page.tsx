@@ -37,7 +37,7 @@ export default function PaginaSolucoes() {
             </div>
           </Link>
 
-          <Link href="/solucoes/apps-personalizados" className="group">
+          <Link href="/tecnologias" className="group">
             <div className="overflow-hidden rounded-[2rem] border border-cyan-300/18 bg-cyan-400/10 backdrop-blur-xl transition duration-300 hover:border-cyan-300/35 hover:bg-cyan-400/14">
               <div className="overflow-hidden rounded-[1.7rem] m-3">
                 <div className="h-72 bg-[url('/imagens/solucao-apps.webp')] bg-cover bg-center transition duration-500 group-hover:scale-105" />
