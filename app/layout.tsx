@@ -15,10 +15,10 @@ export default function LayoutRaiz({
   return (
     <html lang="pt-BR">
       <head>
-        {/* Google Analytics */}
+        {/* Google tag (gtag.js) */}
         <script
           async
-          src="https://www.googletagmanager.com/gtag/js?id=G-ESHC13MRMW"
+          src="https://www.googletagmanager.com/gtag/js?id=G-E5HC13MRMW"
         ></script>
 
         <script
@@ -27,7 +27,8 @@ export default function LayoutRaiz({
               window.dataLayer = window.dataLayer || [];
               function gtag(){dataLayer.push(arguments);}
               gtag('js', new Date());
-              gtag('config', 'G-ESHC13MRMW');
+
+              gtag('config', 'G-E5HC13MRMW');
             `,
           }}
         />
