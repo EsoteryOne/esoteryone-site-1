@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Script from "next/script";
+import { GoogleAnalytics } from "@next/third-parties/google";
 import "./globals.css";
 import EstruturaSite from "@/app/componentes/estrutura-site";
 import BannerCookies from "@/app/componentes/banner-cookies";
@@ -11,28 +12,17 @@ export const metadata: Metadata = {
 
 export default function LayoutRaiz({
   children,
-}: {
+}: Readonly<{
   children: React.ReactNode;
-}) {
+}>) {
   return (
     <html lang="pt-BR">
-      <head>
-        {/* Google Analytics */}
-        <Script
-          src="https://www.googletagmanager.com/gtag/js?id=G-ESHC13MRMW"
-          strategy="afterInteractive"
-        />
-        <Script id="google-analytics" strategy="afterInteractive">
-          {`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', 'G-ESHC13MRMW');
-          `}
-        </Script>
+      <body className="bg-[#030712] text-white antialiased">
+        <EstruturaSite>{children}</EstruturaSite>
 
-        {/* Clarity */}
-        <Script id="clarity" strategy="afterInteractive">
+        <BannerCookies />
+
+        <Script id="microsoft-clarity" strategy="afterInteractive">
           {`
             (function(c,l,a,r,i,t,y){
               c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
@@ -41,12 +31,9 @@ export default function LayoutRaiz({
             })(window, document, "clarity", "script", "wjsq3mpty2");
           `}
         </Script>
-      </head>
-
-      <body className="bg-[#030712] text-white antialiased">
-        <EstruturaSite>{children}</EstruturaSite>
-        <BannerCookies />
       </body>
+
+      <GoogleAnalytics gaId="G-ESHC13MRMW" />
     </html>
   );
 }
