@@ -27,6 +27,35 @@ export default function LandingPageEmotionTab() {
   const [botaoHover, setBotaoHover] = useState(false);
   const [botaoOffset, setBotaoOffset] = useState({ x: 0, y: 0 });
 
+function rastrearClique(nomeEvento: string, rotulo: string) {
+  if (typeof window === "undefined") return;
+
+  const janela = window as typeof window & {
+    gtag?: (...args: unknown[]) => void;
+    clarity?: (...args: unknown[]) => void;
+  };
+
+  if (janela.gtag) {
+    janela.gtag("event", nomeEvento, {
+      event_category: "clique",
+      event_label: rotulo,
+      page_path: window.location.pathname,
+    });
+  }
+
+  if (janela.clarity) {
+    janela.clarity("event", nomeEvento);
+  }
+}
+
+function irParaPagamento(origem: string) {
+  rastrearClique("clique_pagamento_emotion_tab", origem);
+
+  setTimeout(() => {
+    window.location.href = "/pagamento/emotion-tab";
+  }, 180);
+}  
+
 async function iniciarVideoComSom() {
   const video = videoRef.current;
   if (!video) return;
@@ -250,7 +279,10 @@ async function iniciarVideoComSom() {
                     <div className="relative z-10 flex items-center justify-center px-6">
                       <button
                         type="button"
-                        onClick={iniciarVideoComSom}
+                        onClick={() => {
+                          rastrearClique("clique_play_video_emotion_tab", "botao_play_video");
+                          iniciarVideoComSom();
+                        }}
                         className="group relative flex h-20 w-20 items-center justify-center rounded-full border border-cyan-300/30 bg-cyan-400/15 backdrop-blur-sm transition-all duration-300 hover:scale-110 hover:bg-cyan-300/20"
                         aria-label="Iniciar apresentação"
                       >
@@ -296,7 +328,7 @@ async function iniciarVideoComSom() {
                 <div className="mt-6 flex items-center justify-center">
                   <button
                     type="button"
-                    onClick={() => (window.location.href = "/pagamento/emotion-tab")}
+                    onClick={() => irParaPagamento("botao_comprar_agora")}
                     className="inline-flex items-center justify-center rounded-2xl bg-cyan-400 px-7 py-4 text-sm font-semibold text-[#031019] transition hover:scale-[1.02]"
                   >
                     Comprar agora
@@ -556,7 +588,7 @@ async function iniciarVideoComSom() {
               <div className="mt-8 flex items-center justify-center">
                 <button
                   type="button"
-                  onClick={() => (window.location.href = "/pagamento/emotion-tab")}
+                  onClick={() => irParaPagamento("botao_terapeuta_destaque")}
                   className="inline-flex items-center justify-center rounded-2xl bg-cyan-400 px-8 py-4 text-sm font-semibold text-[#031019] transition hover:scale-[1.02]"
                 >
                   Quero me tornar um terapeuta de destaque
