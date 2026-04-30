@@ -11,18 +11,17 @@ export const metadata: Metadata = {
 
 export default function LayoutRaiz({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="pt-BR">
-      <body className="bg-[#030712] text-white antialiased">
+      <head>
         {/* Google Analytics */}
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-ESHC13MRMW"
           strategy="afterInteractive"
         />
-
         <Script id="google-analytics" strategy="afterInteractive">
           {`
             window.dataLayer = window.dataLayer || [];
@@ -32,8 +31,8 @@ export default function LayoutRaiz({
           `}
         </Script>
 
-        {/* Microsoft Clarity */}
-        <Script id="microsoft-clarity" strategy="afterInteractive">
+        {/* Clarity */}
+        <Script id="clarity" strategy="afterInteractive">
           {`
             (function(c,l,a,r,i,t,y){
               c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
@@ -42,9 +41,10 @@ export default function LayoutRaiz({
             })(window, document, "clarity", "script", "wjsq3mpty2");
           `}
         </Script>
+      </head>
 
+      <body className="bg-[#030712] text-white antialiased">
         <EstruturaSite>{children}</EstruturaSite>
-
         <BannerCookies />
       </body>
     </html>
