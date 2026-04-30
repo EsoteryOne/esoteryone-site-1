@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Script from "next/script";
 import "./globals.css";
 import EstruturaSite from "@/app/componentes/estrutura-site";
+import BannerCookies from "@/app/componentes/banner-cookies";
 
 export const metadata: Metadata = {
   title: "EsoteryOne",
@@ -32,6 +33,7 @@ export default function LayoutRaiz({
 
       <body className="bg-[#030712] text-white antialiased">
         <EstruturaSite>{children}</EstruturaSite>
+        <BannerCookies />
       </body>
     </html>
   );
