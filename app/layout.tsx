@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Script from "next/script";
 import "./globals.css";
 import EstruturaSite from "@/app/componentes/estrutura-site";
 
@@ -17,19 +16,34 @@ export default function LayoutRaiz({
     <html lang="pt-BR">
       <head>
         {/* Google Analytics */}
-        <Script
+        <script
+          async
           src="https://www.googletagmanager.com/gtag/js?id=G-ESHC13MRMW"
-          strategy="afterInteractive"
+        ></script>
+
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', 'G-ESHC13MRMW');
+            `,
+          }}
         />
 
-        <Script id="google-analytics" strategy="afterInteractive">
-          {`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', 'G-ESHC13MRMW');
-          `}
-        </Script>
+        {/* Microsoft Clarity */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function(c,l,a,r,i,t,y){
+                c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+                t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+                y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+              })(window, document, "clarity", "script", "wjsq3mpty2");
+            `,
+          }}
+        />
       </head>
 
       <body className="bg-[#030712] text-white antialiased">
