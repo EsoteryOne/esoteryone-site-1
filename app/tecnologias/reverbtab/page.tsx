@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 export const metadata = {
@@ -116,38 +117,40 @@ export default function ReverbTabPage() {
 
           <div className="relative">
             <div className="absolute -inset-10 rounded-full bg-cyan-400/10 blur-3xl" />
-            <div className="relative overflow-hidden rounded-[2rem] border border-cyan-300/18 bg-cyan-400/10 p-6 shadow-2xl backdrop-blur-2xl">
-              <div className="mb-4 h-2 w-28 rounded-full bg-cyan-300/70" />
-              <div className="grid gap-4">
-                <div className="rounded-[1.5rem] border border-cyan-300/18 bg-[#071827]/80 p-5">
-                  <p className="text-sm uppercase tracking-[0.25em] text-cyan-300/70">
-                    Campo amoroso
-                  </p>
-                  <p className="mt-3 text-base leading-7 text-cyan-50/75">
-                    Estrutura de emissão e harmonização voltada ao trabalho com
-                    vínculos, afetos, bloqueios e reorganização do campo
-                    emocional.
-                  </p>
+
+            <div className="relative grid gap-5">
+              <div className="overflow-hidden rounded-[2rem] border border-cyan-300/18 bg-cyan-400/10 p-3 shadow-2xl backdrop-blur-2xl">
+                <Image
+                  src="/imagens/reverb-tab-1.webp"
+                  alt="ReverbTab em atendimento energético"
+                  width={1200}
+                  height={700}
+                  priority
+                  className="h-[260px] w-full rounded-[1.5rem] object-cover md:h-[330px]"
+                />
+              </div>
+
+              <div className="grid gap-5 sm:grid-cols-2">
+                <div className="overflow-hidden rounded-[2rem] border border-cyan-300/18 bg-cyan-400/10 p-3 shadow-2xl backdrop-blur-2xl">
+                  <Image
+                    src="/imagens/reverb-tab-2.webp"
+                    alt="Interface vertical do ReverbTab"
+                    width={700}
+                    height={1100}
+                    className="h-[300px] w-full rounded-[1.5rem] object-cover"
+                  />
                 </div>
 
-                <div className="rounded-[1.5rem] border border-cyan-300/18 bg-[#071827]/80 p-5">
-                  <p className="text-sm uppercase tracking-[0.25em] text-cyan-300/70">
-                    Campo material
-                  </p>
-                  <p className="mt-3 text-base leading-7 text-cyan-50/75">
-                    Estrutura de atuação voltada à limpeza, alinhamento e
-                    fortalecimento de fluxos ligados à vida prática, financeira
-                    e produtiva.
-                  </p>
-                </div>
+                <div className="rounded-[2rem] border border-cyan-300/18 bg-[#071827]/80 p-6 shadow-2xl backdrop-blur-2xl">
+                  <div className="mb-4 h-2 w-28 rounded-full bg-cyan-300/70" />
 
-                <div className="rounded-[1.5rem] border border-cyan-300/18 bg-[#071827]/80 p-5">
                   <p className="text-sm uppercase tracking-[0.25em] text-cyan-300/70">
-                    Presença profissional
+                    Amor e materialização
                   </p>
-                  <p className="mt-3 text-base leading-7 text-cyan-50/75">
-                    Uma interface que ajuda o terapeuta a apresentar seu método
-                    com força estética, autoridade e percepção de alto valor.
+
+                  <p className="mt-4 text-base leading-7 text-cyan-50/75">
+                    Uma estação visual para conduzir irradiações energéticas com presença,
+                    método, foco e percepção profissional durante o atendimento.
                   </p>
                 </div>
               </div>
