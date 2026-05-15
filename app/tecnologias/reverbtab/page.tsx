@@ -11,7 +11,7 @@ const beneficios = [
   {
     titulo: "Irradiação com presença profissional",
     descricao:
-      "O ReverbTab transforma a condução da sessão em uma experiência visual forte, elegante e impactante, elevando a imagem do terapeuta diante do cliente.",
+      "Diferente de tudo o que você já viu, o Reverb Tab tira você do modelo padrão e bagunçado de trabalhar com um monte de gráficos e te coloca como destaque no mercado de trabalho.",
   },
   {
     titulo: "Estrutura para amor e material",
@@ -19,24 +19,24 @@ const beneficios = [
       "O sistema foi pensado para atuar tanto em tratamentos amorosos quanto materiais, organizando o trabalho energético de forma clara e objetiva.",
   },
   {
-    titulo: "Visual premium e tecnológico",
+    titulo: "Mais que um visual premium e tecnológico",
     descricao:
-      "Cada elemento da interface foi imaginado para transmitir modernidade, sofisticação e alto valor percebido durante o atendimento.",
+      "Cada elemento da interface foi projetado para emitir as ondas de formas necessárias para o atendimento de uma forma moderna, sofisticada e de alto valor percebido durante o atendimento.",
   },
   {
-    titulo: "Mais segurança na condução da sessão",
+    titulo: "Atenda de onde estiver",
     descricao:
-      "Com uma estrutura visual bem definida, o terapeuta consegue manter foco, firmeza e organização ao longo de todo o processo de limpeza, harmonização e envio.",
+      "Você pode viajar, tirar férias, passar o final de semana em algum outro local, sem interromper os seus atendimentos em andamento e sem precisar levar um monte de gráficos com você. Basta levar seu celular ou seu tablet.",
   },
   {
-    titulo: "Experiência marcante para o consulente",
+    titulo: "Nunca mais se perca nos atendimentos",
     descricao:
-      "O cliente percebe que está diante de um método moderno, diferenciado e visualmente poderoso, o que fortalece confiança e autoridade.",
+      "Chega de anotar em papel quantos dias faltam para cada atendimento. O sistema mostra automaticamente quantos dias restam daquele atendimento, basta você escolher a quantidade de dias através do relógio radiestésico.",
   },
   {
-    titulo: "Base para futuras integrações",
+    titulo: "Trabalho em grande escala",
     descricao:
-      "O ReverbTab pode se tornar o elo operacional entre os diagnósticos do EmotionTab e do ProsperaTab e a etapa prática de tratamento energético.",
+      "Antes o terapeuta precisava ter espaço para deixar seus gráficos em sua casa, hoje, basta ter um celular ou tablet. A tecnologia inicia automaticamente as reverberações dos teus clientes, uma após a outra.",
   },
 ];
 
@@ -55,15 +55,15 @@ const etapas = [
   },
   {
     numero: "03",
-    titulo: "Irradiação e harmonização",
+    titulo: "Limpeza dos bloqueios",
     descricao:
-      "O trabalho é conduzido com apoio de uma interface tecnológica que fortalece foco, intenção, presença e impacto visual.",
+      "Você seleciona todos os bloqueios que impedem o teu consulente de alcançar aquele objetivo e ativa a primeira etapa de limpeza. Nessa hora, o sistema se ativa com todas as frequências sonoras e visuais necessárias para a limpeza dos bloqueios.",
   },
   {
     numero: "04",
-    titulo: "Valorização do atendimento",
+    titulo: "Ativação da materialização",
     descricao:
-      "A sessão deixa de parecer improvisada e passa a ser percebida como um método premium, moderno e estruturado.",
+      "Você ativa a etapa de materialização. Nessa hora, o sistema se ativa com todas as frequências sonoras e visuais necessárias para materializar aquele objetivo.",
   },
 ];
 
@@ -84,9 +84,9 @@ export default function ReverbTabPage() {
             </h1>
 
             <p className="mt-6 max-w-2xl text-lg leading-8 text-cyan-50/75 md:text-xl">
-              O ReverbTab é a estação tecnológica de irradiação energética da
-              EsoteryOne, criada para conduzir tratamentos com presença visual,
-              sofisticação e alto valor percebido.
+              O ReverbTab é a tecnologi de irradiação energética da
+              EsoteryOne, Primeira Tela Radiônica capaz de emitir
+              ondas de formas materializadoras e desmaterializadoras.
             </p>
 
             <p className="mt-6 max-w-2xl text-base leading-7 text-cyan-300/80 md:text-lg">
@@ -104,7 +104,7 @@ export default function ReverbTabPage() {
               </Link>
 
               <Link
-                href="/tecnologias"
+                href="https://play.google.com/store/apps/details?id=com.esoteryone.reverbtab"
                 className="inline-flex items-center justify-center rounded-2xl border border-cyan-300/25 bg-cyan-400/10 px-6 py-4 text-base font-semibold text-cyan-50 backdrop-blur-xl transition hover:bg-cyan-400/15"
               >
                 Voltar para Tecnologias
@@ -157,9 +157,9 @@ export default function ReverbTabPage() {
             </h2>
 
             <p className="mt-5 text-lg leading-8 text-cyan-50/72">
-              O ReverbTab foi concebido para fortalecer a etapa prática do
-              tratamento energético com mais presença, organização, beleza
-              visual e impacto durante a sessão.
+              Diferente dos gráficos estáticos, essa tecnologia une ondas de formas
+              em movimento, frequências sonoras, cromoterapia e visualização
+              materializadora. Tudo em um único lugar.
             </p>
           </div>
         </div>
@@ -193,9 +193,10 @@ export default function ReverbTabPage() {
             </h2>
 
             <p className="mt-5 max-w-xl text-lg leading-8 text-cyan-50/72">
-              Ele funciona como uma estação visual e energética para a condução
-              da sessão, ajudando o terapeuta a trabalhar com mais clareza,
-              firmeza e valor percebido.
+              Ele é uma Tela Radiônica emissora de formas capaz
+              de desmagnetizar os bloqueios que impedem o consulente
+              de alcançar seus objetivos e de materializar, através dos
+              planos causais, os objetivos e metas do seu consulente.
             </p>
           </div>
 
@@ -250,7 +251,7 @@ export default function ReverbTabPage() {
               </Link>
 
               <Link
-                href="/"
+                href="https://play.google.com/store/apps/details?id=com.esoteryone.reverbtab"
                 className="inline-flex items-center justify-center rounded-2xl border border-cyan-300/25 bg-transparent px-6 py-4 text-base font-semibold text-cyan-50 transition hover:bg-cyan-400/10"
               >
                 Ir para a página inicial
