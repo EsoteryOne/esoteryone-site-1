@@ -65,34 +65,17 @@ export default function PaginaTecnologias() {
               </div>
             </div>
 
-            <div className="relative grid gap-5 md:grid-cols-[1.2fr_0.8fr]">
+            <div className="relative">
               <div className="absolute inset-0 rounded-[2rem] bg-cyan-300/20 blur-3xl" />
-
-              {/* IMAGEM HORIZONTAL */}
-              <div className="relative overflow-hidden rounded-[2rem] border border-cyan-300/20 bg-[#031018]/70 p-3">
+              <div className="relative overflow-hidden rounded-[2rem] border border-cyan-300/20 bg-[#031018]/70 p-4">
                 <Image
-                  src="/imagens/reverb-tab-1.webp"
-                  alt="ReverbTab"
-                  width={1200}
-                  height={700}
-                  className="h-[260px] w-full rounded-[1.5rem] object-cover md:h-[420px]"
+                  src="/imagens/banner-tecnologia.webp"
+                  alt="Tecnologia EsoteryOne"
+                  width={900}
+                  height={620}
+                  className="h-[300px] w-full rounded-[1.5rem] object-cover md:h-[420px]"
                   priority
                 />
-
-                <div className="absolute inset-0 bg-gradient-to-t from-[#031018]/70 via-transparent to-transparent" />
-              </div>
-
-              {/* IMAGEM VERTICAL */}
-              <div className="relative overflow-hidden rounded-[2rem] border border-cyan-300/20 bg-[#031018]/70 p-3">
-                <Image
-                  src="/imagens/reverb-tab-2.webp"
-                  alt="Sistema ReverbTab"
-                  width={700}
-                  height={1200}
-                  className="h-[260px] w-full rounded-[1.5rem] object-cover md:h-[420px]"
-                />
-
-                <div className="absolute inset-0 bg-gradient-to-t from-[#031018]/70 via-transparent to-transparent" />
               </div>
             </div>
           </div>
