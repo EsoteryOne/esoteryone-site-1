@@ -96,15 +96,17 @@ export default function ReverbTabPage() {
             </p>
 
             <div className="mt-10 flex flex-col gap-4 sm:flex-row">
-              <Link
-                href="/contato"
+              <a
+                href="https://play.google.com/store/apps/details?id=com.esoteryone.reverbtab"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="inline-flex items-center justify-center rounded-2xl bg-cyan-300 px-6 py-4 text-base font-semibold text-[#031018] transition hover:scale-[1.02]"
               >
                 Instale agora
-              </Link>
+              </a>
 
               <Link
-                href="https://play.google.com/store/apps/details?id=com.esoteryone.reverbtab"
+                href="/"
                 className="inline-flex items-center justify-center rounded-2xl border border-cyan-300/25 bg-cyan-400/10 px-6 py-4 text-base font-semibold text-cyan-50 backdrop-blur-xl transition hover:bg-cyan-400/15"
               >
                 Voltar para Tecnologias
@@ -243,15 +245,17 @@ export default function ReverbTabPage() {
             </p>
 
             <div className="mt-10 flex flex-col gap-4 sm:flex-row">
-              <Link
-                href="/contato"
+              <a
+                href="https://play.google.com/store/apps/details?id=com.esoteryone.reverbtab"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="inline-flex items-center justify-center rounded-2xl bg-cyan-300 px-6 py-4 text-base font-semibold text-[#031018] transition hover:scale-[1.02]"
               >
                 Instale agora
-              </Link>
+              </a>
 
               <Link
-                href="https://play.google.com/store/apps/details?id=com.esoteryone.reverbtab"
+                href="/"
                 className="inline-flex items-center justify-center rounded-2xl border border-cyan-300/25 bg-transparent px-6 py-4 text-base font-semibold text-cyan-50 transition hover:bg-cyan-400/10"
               >
                 Ir para a página inicial
